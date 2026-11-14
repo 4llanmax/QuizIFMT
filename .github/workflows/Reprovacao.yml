@@ -1,0 +1,46 @@
+# Registra reprovações e encerra pull requests sem executar o código da entrega.
+# Redator: Allan Max
+# Data de criação: 12/11/2026
+# Status: Revisado
+# Data do Status: 12/11/2026
+
+name: Registro de reprovação
+
+on:
+  workflow_run:
+    workflows: [Validação]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: Reprovacao-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: php {0}
+
+jobs:
+  registrarReprovacao:
+    if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'success' }}
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.5.12-apache
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Registrar a issue e encerrar o pull request reprovado
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          <?php
+          require '.github/Verificacoes/Reprovacao.php';
+          exit(Reprovacao::executar());

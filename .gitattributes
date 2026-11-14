@@ -1,0 +1,23 @@
+# Define a normalização de texto e o tratamento dos arquivos binários no Git.
+# Redator: Allan Max
+# Data de criação: 08/09/2026
+# Status: Revisado
+# Data do Status: 18/10/2026
+
+# Normaliza a quebra de linha no repositório, independentemente do sistema operacional.
+* text=auto eol=lf
+
+# Arquivos binários não sofrem conversão de fim de linha.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.avif  binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.phar  binary

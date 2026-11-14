@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Protege documentos numerados e confere o índice antes do commit, conforme 00Regras.md.
+ * Redator: Allan Max
+ * Data de criação: 27/10/2026
+ * Status: Revisado
+ * Data do Status: 11/11/2026
+ */
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/ConferenciaDocumentosNumerados.php';
+
+$erros = (new ConferenciaDocumentosNumerados(getcwd()))->conferir(true);
+foreach ($erros as $erro) {
+    fwrite(STDERR, $erro . "\n");
+}
+if ($erros === []) {
+    echo "Documentos numerados idênticos ao registro.\n";
+}
+exit($erros === [] ? 0 : 1);

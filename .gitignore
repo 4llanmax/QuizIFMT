@@ -1,0 +1,38 @@
+# Define exclusões de arquivos privados e gerados, preservando modelos e READMEs.
+# Redator: Allan Max
+# Data de criação: 08/09/2026
+# Status: Revisado
+# Data do Status: 18/10/2026
+
+# Ambiente e credenciais
+.env
+*.env
+!Exemplo.env
+
+# Banco de dados
+*.sqlite
+/Dados/Arquivos/BancoDados/*
+!/Dados/Arquivos/BancoDados/README.md
+
+# Arquivos operacionais gerados em execução
+/Dados/Arquivos/Logs/*
+!/Dados/Arquivos/Logs/README.md
+
+/Dados/Arquivos/Uploads/*
+!/Dados/Arquivos/Uploads/README.md
+
+/Dados/Arquivos/Cache/*
+!/Dados/Arquivos/Cache/README.md
+
+# Editores e ferramentas
+.idea/
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.claude
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini

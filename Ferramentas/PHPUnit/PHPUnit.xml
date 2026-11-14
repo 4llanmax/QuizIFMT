@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Identifica a preparação e os cenários PHP existentes, sem histórico persistente de execuções.
+Redator: Allan Max
+Data de criação: 11/11/2026
+Status: Revisado
+Data do Status: 11/11/2026
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/13.3/phpunit.xsd"
+         bootstrap="../../Testes/Apoio/Preparacao.php"
+         recordTestRunHistory="false"
+         failOnEmptyTestSuite="true"
+         failOnRisky="true"
+         failOnSkipped="true"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="Integracao">
+            <directory suffix="Teste.php">../../Testes/Integracao</directory>
+        </testsuite>
+        <testsuite name="Unitario">
+            <directory suffix="Teste.php">../../Testes/Unitario</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">../../Aplicacao</directory>
+            <file>../../Publico/index.php</file>
+        </include>
+    </source>
+</phpunit>

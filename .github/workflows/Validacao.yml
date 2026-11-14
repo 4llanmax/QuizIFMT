@@ -1,0 +1,161 @@
+# Executa as verificações PHP e mantém a preparação da aplicação condicionada ao conteúdo.
+# Redator: Allan Max
+# Data de criação: 08/09/2026
+# Status: Revisado
+# Data do Status: 12/11/2026
+
+name: Validação
+
+on:
+  pull_request:
+    branches: [Validacao]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: php {0}
+
+jobs:
+  classificarAlteracao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      documental: ${{ steps.classificacao.outputs.documental }}
+      aplicacao: ${{ steps.classificacao.outputs.aplicacao }}
+      rigoroso: ${{ steps.classificacao.outputs.rigoroso }}
+      destino: ${{ steps.classificacao.outputs.destino }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Classificar conteúdo e destino
+        id: classificacao
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('classificar'));
+  conferirAutomacao:
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.5.12-apache
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Conferir as extensões do executor de testes
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('extensoes'));
+      - name: Conferir integridade do PHPUnit
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('integridade'));
+      - name: Preparar Git para os cenários isolados
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('dependencias'));
+      - name: Executar os testes da automação
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('testes'));
+  conferirDocumentacao:
+    needs: classificarAlteracao
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Conferir cabeçalhos, revisão e referências locais
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('documentacao'));
+  conferirDocumentosNumerados:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Conferir bloqueio dos documentos numerados
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('numerados'));
+  validar:
+    needs: classificarAlteracao
+    if: ${{ needs.classificarAlteracao.outputs.aplicacao == 'true' }}
+    continue-on-error: ${{ needs.classificarAlteracao.outputs.rigoroso == 'false' }}
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.5.12-apache
+      # Permite configurar o endereço reservado no loopback do contêiner isolado.
+      options: --cap-add=NET_ADMIN
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Conferir preparação das verificações
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('preparacao'));
+      - name: Preparar PHP e Apache
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('ambiente'));
+      - name: Conferir somas antes de executar ferramentas
+        id: somas
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('somas'));
+      - name: PHPStan
+        if: ${{ !cancelled() && steps.somas.outcome == 'success' }}
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('phpstan'));
+      - name: PHPCS
+        if: ${{ !cancelled() && steps.somas.outcome == 'success' }}
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('phpcs'));
+      - name: PHPUnit com Apache, TLS e permissões POSIX
+        if: ${{ !cancelled() && steps.somas.outcome == 'success' }}
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('phpunit'));
+  conferirResultado:
+    if: ${{ always() }}
+    needs: [classificarAlteracao, conferirAutomacao, conferirDocumentacao, conferirDocumentosNumerados, validar]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Conferir os resultados exigidos para a entrega
+        env:
+          RESULTADO_CLASSIFICACAO: ${{ needs.classificarAlteracao.result }}
+          RESULTADO_AUTOMACAO: ${{ needs.conferirAutomacao.result }}
+          RESULTADO_DOCUMENTACAO: ${{ needs.conferirDocumentacao.result }}
+          RESULTADO_NUMERADOS: ${{ needs.conferirDocumentosNumerados.result }}
+          RESULTADO_APLICACAO: ${{ needs.validar.result }}
+          DOCUMENTAL: ${{ needs.classificarAlteracao.outputs.documental }}
+          APLICACAO: ${{ needs.classificarAlteracao.outputs.aplicacao }}
+          RIGOROSO: ${{ needs.classificarAlteracao.outputs.rigoroso }}
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('resultado'));
