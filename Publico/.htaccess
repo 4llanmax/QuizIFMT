@@ -1,0 +1,14 @@
+# Encaminha operações dinâmicas e entrega somente os ativos utilizados pelo jogo.
+# Redator: Allan Max
+# Data de criação: 16/11/2026
+# Status: Sem revisão
+# Data do Status: 16/11/2026
+Options -Indexes
+DirectoryIndex index.php
+AddType application/manifest+json .webmanifest
+AddDefaultCharset UTF-8
+RewriteEngine On
+RewriteRule ^(?:Ativos/CSS/Principal\.min\.css|Ativos/JavaScript/Principal\.min\.js|Ativos/Imagens/Bomba\.svg|Ativos/Fontes/Manrope/Manrope-VariableFont_wght\.woff2|Ativos/Fontes/Orbitron/Orbitron-VariableFont_wght\.woff2|Ativos/Fontes/FontAwesome-7\.3\.1/webfonts/fa-solid-900\.woff2|Manifesto\.webmanifest)$ - [END]
+RewriteRule ^(?:Ativos/|\.) - [F,END]
+RewriteRule ^index\.php$ - [END]
+RewriteRule ^ index.php [END]

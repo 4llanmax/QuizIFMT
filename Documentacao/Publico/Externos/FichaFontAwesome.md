@@ -2,7 +2,7 @@
 
 | Redator   | Data de criação | Status      | Data do Status |
 | --------- | --------------- | ----------- | -------------- |
-| Allan Max | 12/10/2026      | Revisado | 12/11/2026 |
+| Allan Max | 12/10/2026      | Sem revisão | 16/11/2026     |
 
 ## Objetivo
 
@@ -16,9 +16,9 @@ A ficha identifica os recursos locais do Font Awesome Free, sua origem, seus cam
 | Versão | 7.3.1, conforme os cabeçalhos distribuídos nos arquivos CSS e JavaScript |
 | Origem | [Lançamento 7.3.1](https://github.com/FortAwesome/Font-Awesome/releases/tag/7.3.1) do fornecedor, pacote `fontawesome-free-7.3.1-web.zip`, com SHA-256 `35bc95eb1e5f9f04902ba2f5b2d04bf72178fa5bb4b5b5d08deb10115e3eb465` publicado no lançamento |
 | Licença | O [LICENSE.txt distribuído](../../../Publico/Ativos/Fontes/FontAwesome-7.3.1/LICENSE.txt) identifica CC BY 4.0 para os ícones SVG e JavaScript, SIL OFL 1.1 para as fontes e MIT para o código; os avisos originais permanecem nos arquivos. Conferência em [Conferência das licenças](#conferência-das-licenças) |
-| Justificativa | Pendente: registrar a justificativa de uso no projeto |
+| Justificativa | Apresentar os ícones do jogo com a distribuição local já licenciada |
 | Finalidade | Distribuição de ícones por folhas de estilo, fontes, JavaScript e SVG; identifica recursos disponíveis, sem declarar uma interface implementada |
-| Integração | Ainda não implementada: não há componente que carregue estes recursos. Os caminhos disponíveis estão em [Caminhos instalados](#caminhos-instalados) |
+| Integração | `Principal.css` carrega somente a fonte sólida WOFF2 7.3.1 e declara as classes próprias dos ícones; não há carregamento de JavaScript do fornecedor pela rede |
 | Requisitos | Servidor com os caminhos e tipos de conteúdo previstos em [Entrega web](../../03Configuracoes.md#entrega-web); navegador compatível com os recursos escolhidos |
 | Inclusão | Pendente: registrar a inclusão no projeto |
 | Alterações locais | Separação dos recursos entre as famílias de ativos e organização das pastas pelo nome e pela versão. Nos 12 arquivos CSS que referenciam fontes, incluindo os minificados, a URL `../webfonts/` foi trocada por `../../Fontes/FontAwesome-7.3.1/webfonts/`, sem outra alteração. As pastas `metadata` e `scss` do pacote não foram instaladas |
@@ -56,3 +56,7 @@ Conferir os recursos efetivamente carregados pelo componente, a apresentação d
 Os originais preservados nas famílias de ativos não autorizam acesso público ao conteúdo fonte sem processamento. A preparação da entrega DEVE preservar os avisos do fornecedor e atender aos bloqueios de [Ativos](../../02Estrutura.md#ativos). Não há configuração de servidor comprovada por esta ficha.
 
 O procedimento geral está em [Atualização de ferramentas e dependências](../../00Regras.md#atualização-de-ferramentas-e-dependências).
+
+## Uso no jogo
+
+A conferência HTTP local entrega o recurso pelo tipo correspondente. A verificação visual em navegador e no provedor permanece identificada no [Memorial](../../Memorial.md#verificações-da-implementação-do-jogo). Os arquivos originais de licença permanecem preservados e bloqueados na entrega pública.

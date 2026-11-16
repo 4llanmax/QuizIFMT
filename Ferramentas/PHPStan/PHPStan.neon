@@ -1,0 +1,16 @@
+# Analisa a implementação PHP de produção sem incluir distribuições externas.
+# Redator: Allan Max
+# Data de criação: 16/11/2026
+# Status: Sem revisão
+# Data do Status: 16/11/2026
+parameters:
+    level: 5
+    phpVersion: 80512
+    tmpDir: ../../Dados/Arquivos/Cache/PHPStan
+    paths:
+        - ../../Aplicacao
+        - ../../Publico/index.php
+        - ../../.github/Verificacoes/Validacao.php
+        - ../../Testes/Apoio
+        - ../Ativos/Ativos.php
+        - ../PHPUnit/ConferenciaCobertura.php

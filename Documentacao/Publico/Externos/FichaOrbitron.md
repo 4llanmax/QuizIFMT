@@ -2,7 +2,7 @@
 
 | Redator   | Data de criação | Status      | Data do Status |
 | --------- | --------------- | ----------- | -------------- |
-| Allan Max | 12/10/2026      | Revisado | 12/11/2026 |
+| Allan Max | 12/10/2026      | Sem revisão | 16/11/2026     |
 
 ## Objetivo
 
@@ -16,9 +16,9 @@ A ficha identifica a fonte Orbitron instalada, sua origem, seus arquivos físico
 | Versão | 2.001, declarada como `Version 2.001` na tabela de nomes do arquivo TTF; versão v35 do arquivo distribuído pelo Google Fonts |
 | Origem | Pacote de download da família no [Google Fonts](https://fonts.google.com/specimen/Orbitron), com o TTF servido em `https://fonts.gstatic.com/s/orbitron/v35/yMJRMIlzdpvBhQQL_Tq8fSx5i814.ttf`. O [OFL.txt distribuído](../../../Publico/Ativos/Fontes/Orbitron/OFL.txt) identifica o projeto de origem, [The League of Moveable Type](https://github.com/theleagueof/orbitron) |
 | Licença | SIL Open Font License 1.1, conforme o OFL.txt distribuído, que identifica o nome reservado Orbitron. Termos em [OFL.txt](../../../Publico/Ativos/Fontes/Orbitron/OFL.txt) |
-| Justificativa | Pendente: registrar a justificativa de uso no projeto |
+| Justificativa | Apresentar marca e indicadores do jogo com fonte local, sem nova dependência tipográfica |
 | Finalidade | Disponibilizar a família tipográfica Orbitron para a apresentação da aplicação |
-| Integração | Não implementada: não há declaração CSS ou componente que carregue a fonte. Os requisitos de integração estão em [Integração e atualização](#integração-e-atualização) |
+| Integração | `Principal.css` declara a fonte variável WOFF2 local para títulos e indicadores; a entrega usa `Principal.min.css` |
 | Requisitos | Navegador com suporte a WOFF2 e a fontes variáveis e servidor com o tipo de conteúdo `font/woff2` |
 | Inclusão | Pendente: registrar a inclusão no projeto |
 | Alterações locais | Conversão do TTF variável para WOFF2, preservando o TTF original, conforme [Arquivos instalados](#arquivos-instalados). Nenhuma no README.txt. Fim de linha do OFL.txt normalizado para LF pelo `.gitattributes` |
@@ -42,3 +42,7 @@ A conversão foi feita com fontTools 4.67.0 e compressão Brotli, sem subconjunt
 A integração da fonte DEVE declarar o endereço público do arquivo no CSS do componente responsável e conferir o carregamento e a apresentação nos navegadores adotados. Esta regra não declara um CSS ou componente existente.
 
 Ao substituir a fonte, conferir seus metadados, a licença, o resumo e as referências dos consumidores. O procedimento geral está em [Atualização de ferramentas e dependências](../../00Regras.md#atualização-de-ferramentas-e-dependências).
+
+## Uso no jogo
+
+A conferência HTTP local entrega o recurso pelo tipo correspondente. A verificação visual em navegador e no provedor permanece identificada no [Memorial](../../Memorial.md#verificações-da-implementação-do-jogo). Os arquivos originais de licença permanecem preservados e bloqueados na entrega pública.

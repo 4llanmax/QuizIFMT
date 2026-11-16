@@ -4,8 +4,8 @@
  * Executa as verificações e prepara o ambiente isolado do GitHub Actions usando PHP.
  * Redator: Allan Max
  * Data de criação: 11/11/2026
- * Status: Revisado
- * Data do Status: 11/11/2026
+ * Status: Sem revisão
+ * Data do Status: 16/11/2026
  */
 
 declare(strict_types=1);
@@ -24,8 +24,14 @@ final class Validacao
     /** Executa programas diretamente e preserva seus fluxos e códigos de término. */
     private function processo(array $comando): int
     {
-        $processo = proc_open($comando, [0 => STDIN, 1 => STDOUT, 2 => STDERR],
-            $canais, $this->raiz, null, ['bypass_shell' => true]);
+        $processo = proc_open(
+            $comando,
+            [0 => STDIN, 1 => STDOUT, 2 => STDERR],
+            $canais,
+            $this->raiz,
+            null,
+            ['bypass_shell' => true]
+        );
         if (!is_resource($processo)) {
             throw new RuntimeException('Não foi possível iniciar: ' . $comando[0]);
         }
@@ -51,8 +57,11 @@ final class Validacao
                 $erros[] = "Instalação ou documento ausente para $ferramenta.";
                 continue;
             }
-            preg_match_all('/^\| Integridade \| SHA-256: `([0-9a-f]{64})`; fonte: https:\/\/[^|]+ \|$/m',
-                str_replace("\r\n", "\n", file_get_contents($documento)), $resumos);
+            preg_match_all(
+                '/^\| Integridade \| SHA-256: `([0-9a-f]{64})`; fonte: https:\/\/[^|]+ \|$/m',
+                str_replace("\r\n", "\n", file_get_contents($documento)),
+                $resumos
+            );
             if (count($resumos[1]) !== 1) {
                 $erros[] = "Registro de integridade inválido para $ferramenta.";
             } elseif (!hash_equals($resumos[1][0], hash_file('sha256', $executavel))) {
@@ -66,10 +75,12 @@ final class Validacao
     public function preparar(int $versao = PHP_VERSION_ID): array
     {
         $erros = $versao >= 80512 ? [] : ['O projeto exige PHP 8.5.12 ou superior.'];
-        foreach (['Ferramentas/PHPStan/PHPStan.neon', 'Ferramentas/PHPCS/PHPCS.xml',
+        foreach (
+            ['Ferramentas/PHPStan/PHPStan.neon', 'Ferramentas/PHPCS/PHPCS.xml',
             'Ferramentas/PHPUnit/PHPUnit.xml', 'Testes/Apoio/Preparacao.php',
             'Aplicacao/Nucleo/Comuns/Funcoes/AutoCarregamento.php', 'Publico/index.php',
-            'Configuracoes/Aplicacao/Exemplo.env'] as $arquivo) {
+            'Configuracoes/Aplicacao/Exemplo.env'] as $arquivo
+        ) {
             if (!is_file($this->raiz . '/' . $arquivo) || filesize($this->raiz . '/' . $arquivo) === 0) {
                 $erros[] = 'Arquivo necessário ausente ou vazio: ' . $arquivo;
             }
@@ -79,9 +90,12 @@ final class Validacao
             if (!is_dir($this->raiz . '/' . $pasta)) {
                 continue;
             }
-            foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
-                $this->raiz . '/' . $pasta, FilesystemIterator::SKIP_DOTS,
-            )) as $arquivo) {
+            foreach (
+                new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
+                    $this->raiz . '/' . $pasta,
+                    FilesystemIterator::SKIP_DOTS,
+                )) as $arquivo
+            ) {
                 $cenario = $cenario || ($arquivo->isFile() && str_ends_with($arquivo->getFilename(), 'Teste.php'));
             }
         }
@@ -152,7 +166,10 @@ final class Validacao
     private function ambiente(): void
     {
         $this->exigir(['apt-get', 'update']);
-        $this->exigir(['apt-get', 'install', '-y', '--no-install-recommends', 'git', 'openssl', 'ca-certificates', 'iproute2']);
+        $this->exigir(['apt-get', 'install', '-y', '--no-install-recommends', 'git', 'openssl', 'ca-certificates', 'iproute2', 'libicu-dev']);
+        $this->exigir(['docker-php-ext-install', '-j2', 'intl', 'pdo_mysql']);
+        $this->exigir(['pecl', 'install', 'xdebug-3.5.3']);
+        $this->exigir(['docker-php-ext-enable', 'xdebug']);
         // Endereço reservado à documentação, associado ao loopback isolado do contêiner.
         $this->exigir(['ip', 'addr', 'add', '203.0.113.5/32', 'dev', 'lo']);
         $this->exigir(['a2enmod', 'rewrite', 'headers', 'ssl']);
@@ -166,9 +183,7 @@ final class Validacao
         }
         $destino = '/var/www/EstruturaPHP';
         $this->copiar($this->raiz, $destino);
-        if (!copy($this->raiz . '/Configuracoes/Aplicacao/Exemplo.env', $destino . '/Configuracoes/Aplicacao/.env')) {
-            throw new RuntimeException('Não foi possível preparar os parâmetros fictícios.');
-        }
+        $this->exigir([PHP_BINARY, $destino . '/Testes/Apoio/PrepararServidor.php']);
         $this->gravar('/etc/apache2/sites-available/000-default.conf', <<<'APACHE'
 <VirtualHost *:80>
     ServerName exemplo.local
@@ -188,8 +203,10 @@ final class Validacao
 TraceEnable Off
 
 APACHE);
-        $arquivos = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($destino,
-            FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+        $arquivos = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
+            $destino,
+            FilesystemIterator::SKIP_DOTS
+        ), RecursiveIteratorIterator::SELF_FIRST);
         $permissoes = static function (string $caminho, bool $pasta): void {
             if (!chmod($caminho, $pasta ? 0755 : 0644) || !chown($caminho, 'www-data') || !chgrp($caminho, 'www-data')) {
                 throw new RuntimeException('Não foi possível preparar permissões: ' . $caminho);
@@ -231,7 +248,7 @@ APACHE);
                     break;
                 case 'testes':
                     return ($this->processo)([PHP_BINARY, 'Ferramentas/PHPUnit/PHPUnit.phar',
-                        '--configuration', 'Ferramentas/PHPUnit/PHPUnit.xml']);
+                        '--configuration', 'Ferramentas/PHPUnit/PHPUnit.xml', '--testsuite', 'Automacao', '--no-coverage']);
                 case 'preparacao':
                     $erros = $this->preparar();
                     break;
@@ -247,10 +264,16 @@ APACHE);
                 case 'phpstan':
                 case 'phpcs':
                 case 'phpunit':
+                case 'cobertura':
+                case 'ativos':
+                case 'javascript':
                     $comandos = [
                         'phpstan' => ['Ferramentas/PHPStan/PHPStan.phar', 'analyse', '--configuration',
                             'Ferramentas/PHPStan/PHPStan.neon', '--memory-limit=512M'],
                         'phpcs' => ['Ferramentas/PHPCS/PHPCS.phar', '--standard=Ferramentas/PHPCS/PHPCS.xml'],
+                        'cobertura' => ['Ferramentas/PHPUnit/ConferenciaCobertura.php'],
+                        'ativos' => ['Ferramentas/Ativos/Ativos.php', '--conferir'],
+                        'javascript' => ['Testes/Apoio/ConferenciaJavaScript.mjs'],
                         'phpunit' => ['Ferramentas/PHPUnit/PHPUnit.phar', '--configuration',
                             'Ferramentas/PHPUnit/PHPUnit.xml', '--display-skipped', '--fail-on-skipped', '--colors=never'],
                     ];
@@ -259,7 +282,7 @@ APACHE);
                     }
                     // O diretório da cópia e a identidade POSIX são aplicados antes de iniciar a ferramenta.
                     $this->raiz = '/var/www/EstruturaPHP';
-                    return ($this->processo)(['runuser', '-u', 'www-data', '--', PHP_BINARY, ...$comandos[$etapa]]);
+                    return ($this->processo)(['runuser', '-u', 'www-data', '--', $etapa === 'javascript' ? 'node' : PHP_BINARY, ...$comandos[$etapa]]);
                 case 'resultado':
                     $dados = getenv();
                     $erros = $this->resultado($dados);

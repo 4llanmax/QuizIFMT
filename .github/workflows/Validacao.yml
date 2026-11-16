@@ -1,8 +1,8 @@
 # Executa as verificações PHP e mantém a preparação da aplicação condicionada ao conteúdo.
 # Redator: Allan Max
 # Data de criação: 08/09/2026
-# Status: Revisado
-# Data do Status: 12/11/2026
+# Status: Sem revisão
+# Data do Status: 16/11/2026
 
 name: Validação
 
@@ -99,9 +99,30 @@ jobs:
       image: php:8.5.12-apache
       # Permite configurar o endereço reservado no loopback do contêiner isolado.
       options: --cap-add=NET_ADMIN
-    timeout-minutes: 15
+    # Serviço exclusivo e descartável; a senha abaixo é fictícia e não é usada na hospedagem.
+    services:
+      mariadb:
+        image: mariadb:10.6.28
+        env:
+          MARIADB_ROOT_PASSWORD: teste_ci
+          MARIADB_ROOT_HOST: '%'
+        options: >-
+          --health-cmd="mariadb-admin ping --silent -uroot -pteste_ci"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=20
+    env:
+      TESTE_BANCO_HOST: mariadb
+      TESTE_BANCO_PORTA: '3306'
+      TESTE_BANCO_USUARIO: root
+      TESTE_BANCO_SENHA: teste_ci
+      XDEBUG_MODE: coverage
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Conferir preparação das verificações
         run: |
           <?php
@@ -136,6 +157,24 @@ jobs:
           <?php
           require '.github/Verificacoes/Validacao.php';
           exit((new Validacao(getcwd()))->executar('phpunit'));
+      - name: Conferir cobertura integral
+        if: ${{ !cancelled() && steps.somas.outcome == 'success' }}
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('cobertura'));
+      - name: Conferir ativos processados
+        if: ${{ !cancelled() && steps.somas.outcome == 'success' }}
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('ativos'));
+      - name: Conferir JavaScript e sua cobertura
+        if: ${{ !cancelled() && steps.somas.outcome == 'success' }}
+        run: |
+          <?php
+          require '.github/Verificacoes/Validacao.php';
+          exit((new Validacao(getcwd()))->executar('javascript'));
   conferirResultado:
     if: ${{ always() }}
     needs: [classificarAlteracao, conferirAutomacao, conferirDocumentacao, conferirDocumentosNumerados, validar]

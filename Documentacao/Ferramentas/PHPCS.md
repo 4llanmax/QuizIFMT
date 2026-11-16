@@ -1,8 +1,8 @@
 # PHPCS
 
-| Redator   | Data de criação | Status   | Data do Status |
-| --------- | --------------- | -------- | -------------- |
-| Allan Max | 28/09/2026      | Revisado | 12/11/2026 |
+| Redator   | Data de criação | Status      | Data do Status |
+| --------- | --------------- | ----------- | -------------- |
+| Allan Max | 28/09/2026      | Sem revisão | 16/11/2026     |
 
 ## Objetivo
 
@@ -16,7 +16,7 @@ O PHPCS cumpre a função de verificação da forma do código definida em [Fun�
 
 O executável fica em `Ferramentas/PHPCS/PHPCS.phar`. Os dados da instalação estão em [Registro de instalação](#registro-de-instalação), com os campos definidos em [Documento de ferramenta](../01Padroes.md#documento-de-ferramenta).
 
-O arquivo prescrito é `Ferramentas/PHPCS/PHPCS.xml`, atualmente ausente. Ele DEVE identificar as verificações adotadas, seus parâmetros e os caminhos incluídos e excluídos. A correção automática DEVE utilizar o mesmo padrão.
+A configuração `Ferramentas/PHPCS/PHPCS.xml` usa PSR-12 no PHP de produção e nos testes e apoios indicados. O limite de comprimento de linha não se aplica à marcação das visões e às instruções SQL. A correção automática usa a mesma configuração. As convenções próprias de idioma e nomes também recebem conferência de referências e estrutura.
 
 ## Registro de instalação
 
@@ -25,15 +25,15 @@ O arquivo prescrito é `Ferramentas/PHPCS/PHPCS.xml`, atualmente ausente. Ele DE
 | Versão | 4.0.4; consulta por `--version` |
 | Origem | [PHP_CodeSniffer 4.0.4](https://github.com/PHPCSStandards/PHP_CodeSniffer/releases/tag/4.0.4), arquivo phpcs.phar |
 | Licença | [BSD-3-Clause](https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/4.0.4/licence.txt), preservada no PHAR distribuído |
-| Justificativa | Pendente: registrar a justificativa de uso no projeto |
+| Justificativa | Conferir a forma do PHP próprio com padrão explícito |
 | Requisitos | PHP >=7.2.0 e extensões libxml, SimpleXML, tokenizer e XMLWriter, conforme o [composer.json da versão](https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/4.0.4/composer.json); verificações adicionais exigem os requisitos próprios declarados por cada uma |
 | Executável | `Ferramentas/PHPCS/PHPCS.phar` |
-| Configuração | Pendente: criar `Ferramentas/PHPCS/PHPCS.xml`, definindo as verificações e os arquivos incluídos e excluídos |
+| Configuração | `Ferramentas/PHPCS/PHPCS.xml`, com PSR-12, escopo próprio e exceção do comprimento de linha |
 | Integridade | SHA-256: `4b010cd21d8bc8a17e2504792e3c77ef8259126f24caf7eafe7eddef1fa871e9`; fonte: https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/releases/assets/503395408 |
 
 ## Execução
 
-A sintaxe de invocação abaixo exige o arquivo de padrão, atualmente ausente. A execução DEVE partir da raiz do projeto; o bloco não representa uma verificação realizada:
+Executar da raiz:
 
 ```text
 php Ferramentas/PHPCS/PHPCS.phar --standard=Ferramentas/PHPCS/PHPCS.xml
@@ -45,6 +45,8 @@ O arquivo de padrão DEVE definir também os caminhos próprios verificados e os
 
 O resultado informa arquivo, posição e verificação não atendida. A aprovação de forma não comprova o comportamento da aplicação.
 
-A aprovação exige padrão e escopo identificados e atendimento aos critérios de [Configuração das verificações](../04Ferramentas.md#configuração-das-verificações). O padrão do projeto permanece pendente; é PROIBIDO considerar a execução com um padrão implícito como conferência das convenções próprias.
+A aprovação exige código zero, sem erros ou avisos, no padrão e no escopo explícitos. A aprovação de forma não substitui a conferência dos nomes próprios nem os testes de comportamento.
 
 Atualizações e revisão de correções seguem [Atualização de ferramentas e dependências](../00Regras.md#atualização-de-ferramentas-e-dependências).
+
+O apoio de automação `.github/Verificacoes/Validacao.php` mantém sua classe global e sua entrada CLI no mesmo arquivo, conforme o contrato existente fora de Aplicacao e Testes. Somente esse arquivo recebe as exceções explícitas de namespace e de efeitos na declaração do padrão; as demais verificações permanecem aplicadas.

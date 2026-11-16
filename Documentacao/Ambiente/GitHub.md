@@ -1,8 +1,8 @@
 # GitHub
 
-| Redator   | Data de criação | Status   | Data do Status |
-| --------- | --------------- | -------- | -------------- |
-| Allan Max | 18/10/2026      | Revisado | 13/11/2026     |
+| Redator   | Data de criação | Status      | Data do Status |
+| --------- | --------------- | ----------- | -------------- |
+| Allan Max | 18/10/2026      | Sem revisão | 16/11/2026     |
 
 ## Objetivo
 
@@ -281,5 +281,7 @@ php .githooks/ConferenciaDocumentosNumerados.php
 O responsável pela integração DEVE recusar a promoção quando a tarefa falhar, mesmo sem proteção configurada na plataforma.
 
 ### Situação da automação
+
+A configuração do fluxo acrescenta serviço MariaDB 10.6.28 descartável, preparação de extensões e Xdebug, Node para os testes do navegador, conferência dos ativos e bloqueio por cobertura insuficiente. A suíte Automacao é executada isoladamente no trabalho correspondente; a validação da aplicação executa o conjunto completo. Credenciais do serviço são fictícias e seus recursos não pertencem à hospedagem. Os comandos e os cenários estão em [Testes do jogo](../Testes/Integracao/Jogo/TestesJogo.md).
 
 O estado, as pendências de configuração e os limites estão no [Memorial](../Memorial.md#limites-da-automação).

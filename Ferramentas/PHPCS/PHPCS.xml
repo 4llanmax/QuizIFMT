@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Confere a forma do PHP próprio; o limite de linha não se aplica a SQL e marcação das visões.
+Redator: Allan Max
+Data de criação: 16/11/2026
+Status: Sem revisão
+Data do Status: 16/11/2026
+-->
+<ruleset name="QuizIFMT">
+    <description>Padrão de forma do PHP próprio.</description>
+    <rule ref="PSR12"><exclude name="Generic.Files.LineLength"/></rule>
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <exclude-pattern>*/.github/Verificacoes/Validacao.php</exclude-pattern>
+    </rule>
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <exclude-pattern>*/.github/Verificacoes/Validacao.php</exclude-pattern>
+    </rule>
+    <file>../../Aplicacao</file>
+    <file>../../Publico/index.php</file>
+    <file>../../Testes/Unitario</file>
+    <file>../../Testes/Integracao/Jogo</file>
+    <file>../../Testes/Apoio</file>
+    <file>../../Testes/Integracao/Automacao/JogoTeste.php</file>
+    <file>../../.github/Verificacoes/Validacao.php</file>
+    <file>../Ativos/Ativos.php</file>
+    <file>../PHPUnit/ConferenciaCobertura.php</file>
+    <arg name="extensions" value="php"/>
+</ruleset>

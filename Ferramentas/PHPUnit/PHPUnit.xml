@@ -3,8 +3,8 @@
 Identifica a preparação e os cenários PHP existentes, sem histórico persistente de execuções.
 Redator: Allan Max
 Data de criação: 11/11/2026
-Status: Revisado
-Data do Status: 11/11/2026
+Status: Sem revisão
+Data do Status: 16/11/2026
 -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/13.3/phpunit.xsd"
@@ -15,13 +15,26 @@ Data do Status: 11/11/2026
          failOnSkipped="true"
          failOnWarning="true">
     <testsuites>
+        <testsuite name="Automacao">
+            <directory suffix="Teste.php">../../Testes/Integracao/Automacao</directory>
+        </testsuite>
         <testsuite name="Integracao">
-            <directory suffix="Teste.php">../../Testes/Integracao</directory>
+            <directory suffix="Teste.php">../../Testes/Integracao/Jogo</directory>
         </testsuite>
         <testsuite name="Unitario">
             <directory suffix="Teste.php">../../Testes/Unitario</directory>
         </testsuite>
     </testsuites>
+    <coverage branchCoverage="true" pathCoverage="true" includeUncoveredFiles="true" disableCodeCoverageIgnore="true">
+        <report>
+            <clover outputFile="../../Dados/Arquivos/Cache/CoberturaPHP/Clover.xml"/>
+            <php outputFile="../../Dados/Arquivos/Cache/CoberturaPHP/Cobertura.php"/>
+            <text outputFile="../../Dados/Arquivos/Cache/CoberturaPHP/Resumo.txt" showUncoveredFiles="true"/>
+        </report>
+    </coverage>
+    <php>
+        <ini name="memory_limit" value="1G"/>
+    </php>
     <source>
         <include>
             <directory suffix=".php">../../Aplicacao</directory>
