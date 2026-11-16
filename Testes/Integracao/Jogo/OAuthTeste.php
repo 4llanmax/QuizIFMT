@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Testes\Integracao\Jogo;
 
 use Aplicacao\Nucleo\Servicos\OAuth;
+use Aplicacao\Nucleo\Transportes\Resposta;
 use DomainException;
 use PDO;
 use PHPUnit\Framework\Attributes\Test;
@@ -406,6 +407,51 @@ final class OAuthTeste extends TestCase
             self::assertSame(303, $controle->responder($servidor, '', $campos, $sessao, 1001)->status);
             self::assertSame($antes, self::$banco->query('SELECT senha_hash, senha_inicial FROM usuarios_mcp')->fetch(PDO::FETCH_ASSOC));
             self::assertSame($this->usuario, $this->oauth->entrar('operador@example.invalid', $this->senha, '127.0.0.1', 1002)['identificador']);
+        }
+    }
+
+    #[Test]
+    public function paginaAutorizaSomenteOrigemDoRetornoValidadoNaPoliticaConteudo(): void
+    {
+        $controle = new \Aplicacao\Painel\Controles\ConexaoMCP($this->oauth, 'https://quiz.example.invalid');
+        foreach (['https://chatgpt.com/connector_platform_oauth_redirect?origem=teste' => 'https://chatgpt.com', 'http://127.0.0.1:48765/callback' => 'http://127.0.0.1:48765'] as $retorno => $origem) {
+            $cliente = $this->oauth->registrarCliente(['redirect_uris' => [$retorno]]);
+            $pedido = array_replace($this->pedido, ['client_id' => $cliente['client_id'], 'redirect_uri' => $retorno]);
+            $sessao = [];
+            $servidor = ['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/admin/mcp/autorizar?' . http_build_query($pedido), 'REMOTE_ADDR' => '127.0.0.1'];
+            $resposta = $controle->responder($servidor, '', [], $sessao, 1000);
+            self::assertSame(200, $resposta->status);
+            self::assertArrayHasKey('Content-Security-Policy', $resposta->cabecalhos);
+            $politica = str_replace("form-action 'self'", "form-action 'self' " . $origem, Resposta::POLITICA_CONTEUDO);
+            self::assertSame($politica, $resposta->cabecalhos['Content-Security-Policy']);
+            self::assertStringNotContainsString('callback', $politica);
+            self::assertStringNotContainsString('origem=teste', $politica);
+            self::assertStringNotContainsString('*', $politica);
+            $servidor['REQUEST_METHOD'] = 'POST';
+            $campos = ['csrf' => 'invalido', 'acao' => 'autorizar', 'email' => 'operador@example.invalid', 'senha' => 'incorreta', 'redirect_uri' => 'https://intruso.example.invalid/callback'];
+            $recusa = $controle->responder($servidor, '', $campos, $sessao, 1001);
+            self::assertSame(403, $recusa->status);
+            self::assertSame($politica, $recusa->cabecalhos['Content-Security-Policy']);
+            $campos['csrf'] = $sessao['mcpCSRF'];
+            $recusa = $controle->responder($servidor, '', $campos, $sessao, 1002);
+            self::assertSame(422, $recusa->status);
+            self::assertSame($politica, $recusa->cabecalhos['Content-Security-Policy']);
+            self::assertStringNotContainsString('intruso.example.invalid', $politica);
+        }
+    }
+
+    #[Test]
+    public function pedidosAusentesOuInvalidosPreservamPoliticaRestritaDoJogo(): void
+    {
+        $padrao = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+        self::assertSame($padrao, Resposta::POLITICA_CONTEUDO);
+        $controle = new \Aplicacao\Painel\Controles\ConexaoMCP($this->oauth, 'https://quiz.example.invalid');
+        $sessao = [];
+        foreach (['/admin/mcp/autorizar', '/admin/mcp/autorizar?' . http_build_query(array_replace($this->pedido, ['redirect_uri' => 'https://intruso.example.invalid/callback']))] as $uri) {
+            $resposta = $controle->responder(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => $uri], '', [], $sessao, 1000);
+            self::assertSame(422, $resposta->status);
+            self::assertSame($padrao, $resposta->cabecalhos['Content-Security-Policy']);
+            self::assertArrayNotHasKey('mcpPedido', $sessao);
         }
     }
 

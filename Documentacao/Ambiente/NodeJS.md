@@ -16,6 +16,7 @@ O Node.js é programa do ambiente, não é incluído no repositório e não é r
 | --- | --- | --- |
 | `Testes/Unitario/Navegador/PrincipalTeste.mjs` | Arquivo existente | Cenários de comportamento e coleta detalhada V8 |
 | `Testes/Apoio/ConferenciaJavaScript.mjs` | Arquivo existente | Entrada dos testes e recusa de cobertura insuficiente |
+| `Testes/Apoio/ConferenciaNavegadorMCP.mjs` | Arquivo existente | Conferência de navegação do formulário OAuth em Chromium real e isolado |
 | `Dados/Arquivos/Cache/CoberturaJavaScript/Relatorio.json` | Relatório gerado e não versionado | Resultado das versões original e processada |
 | `.github/workflows/Validacao.yml` | Arquivo existente | Seleção do executor no ambiente descartável |
 
@@ -30,3 +31,5 @@ Executar `node Testes/Apoio/ConferenciaJavaScript.mjs` da raiz, usando Node 22 o
 A ferramenta usa `vm`, `assert` e `inspector` nativos. A coleta exige instrumentação de blocos; somente contagem de chamadas de função não comprova cobertura de ramos. Cada cenário recebe identificação própria para a compilação e seus contextos permanecem vivos até a leitura dos contadores.
 
 Falha de asserção, ausência de instrumentação ou intervalo não exercitado causa término não zero. A execução comprova os contratos com o navegador substituído e não substitui a conferência visual ou das permissões reais do dispositivo.
+
+A conferência da navegação OAuth usa `node Testes/Apoio/ConferenciaNavegadorMCP.mjs`, os módulos nativos HTTP e WebSocket e uma instalação existente de Chrome ou Edge. A variável `MCP_NAVEGADOR` permite informar outro executável Chromium. O apoio preserva as verificações de segurança do navegador e usa perfil próprio e dados fictícios. Seu alcance e os limites estão em [Evidência e limites](../Testes/Integracao/Jogo/TestesJogo.md#evidência-e-limites).

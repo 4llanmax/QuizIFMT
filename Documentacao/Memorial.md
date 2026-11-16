@@ -36,6 +36,17 @@ O gancho está ativo nesta cópia por `core.hooksPath=.githooks`, com autorizaç
 
 Os cenários da automação usam executores controlados para conferir decisões e comandos. A instalação das imagens, a preparação Linux, o TLS e a execução do job completo no GitHub ainda dependem de uma execução real do fluxo. A disponibilidade da hospedagem compartilhada não é comprovada pelas verificações locais.
 
+## Verificações do retorno OAuth no navegador
+
+Conferência de 16/11/2026 da correção da [issue de retorno OAuth](https://github.com/4llanmax/QuizIFMT/issues/2):
+
+- A página hospedada mantém o formulário aberto após o envio porque sua diretiva `form-action 'self'` restringe o retorno externo. A conferência privada encontra código de autorização gerado sem token correspondente; o teste HTTP direto não exerce essa restrição do navegador.
+- Chrome 157.0.8103.51, executado sem interface em perfil isolado e com segurança preservada, reproduz o bloqueio do redirecionamento HTTP 303 entre duas origens locais. A política com a origem específica permite o retorno; outro destino continua bloqueado. O relatório da execução fica em `Dados/Arquivos/Cache/NavegadorMCP-32088/Relatorio.json` e contém somente dados fictícios.
+- A política padrão tem definição única em `Resposta::POLITICA_CONTEUDO` e permanece idêntica nas demais páginas. A página OAuth acrescenta somente a origem do retorno registrado e validado. Testes também conferem erros de login, CSRF, retorno local com porta, solicitação inválida e endereço intruso enviado por POST.
+- PHPUnit: 138 testes e 1233 asserções, sem falhas, avisos ou cenários ignorados. O conferidor integral confirma 1436/1436 linhas e 1360/1360 ramos de produção. PHPStan nível 5, PHPCS e `git diff --check` passam; documentos numerados permanecem idênticos.
+
+A correção não altera senhas, estrutura do banco, PKCE, recurso dos tokens, validação exata do retorno ou controles de sessão. O navegador real exercita formulário fictício e política de navegação, sem conta real nem sessão do ChatGPT. A conclusão da conexão no ChatGPT depende de publicar os arquivos corrigidos na hospedagem e iniciar uma nova autorização.
+
 ## Verificações da senha de acesso MCP
 
 Conferência local de 16/11/2026 após a retirada da troca obrigatória:

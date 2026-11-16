@@ -18,6 +18,8 @@ A senha inicial permite autorizar a primeira conexão, obter tokens e renovar o 
 
 Para conectar, o operador DEVE cadastrar a URL do MCP no cliente que aceite servidor HTTP remoto com OAuth, abrir a página de autorização e concluir a identificação e o consentimento. Uma resposta 401 antes da autenticação apresenta a descoberta da autorização no cabeçalho `WWW-Authenticate`.
 
+A política de conteúdo da página de autorização permite envio ao próprio site e à origem do `redirect_uri` registrado e validado para a solicitação. Essa permissão acompanha a página e suas respostas de erro, permitindo ao navegador concluir o redirecionamento HTTP 303 ao cliente. É PROIBIDO incluir destinos fornecidos livremente no POST, usar curingas ou substituir a conferência exata do endereço de retorno. A diretiva segue [form-action do CSP](https://www.w3.org/TR/CSP3/#directive-form-action); o fluxo do cliente segue [Autenticação do MCP no ChatGPT](https://developers.openai.com/plugins/build/auth#oauth-flow).
+
 ## Parâmetros privados
 
 Os parâmetros ficam em `Configuracoes/Aplicacao/.env`, cuja gramática e precedência estão em [Inicialização web](../Nucleo/Inicializacao.md#gramática-dos-parâmetros).

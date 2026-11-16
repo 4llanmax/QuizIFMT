@@ -44,7 +44,7 @@ Sessões nativas usam pastas temporárias próprias, removidas após os cenário
 | Automação | Suíte própria, serviço MariaDB, etapas de cobertura e ativos, gatilho preservado | `Automacao/JogoTeste` e cenários anteriores da automação |
 | Gestão MCP | Perguntas em lote, edição parcial, arquivamento, exclusão confirmada, categorias, paginação e consultas sem credenciais | `GestaoMCPTeste`, `PerguntaTeste` |
 | Equilíbrio das categorias | Total exato, diferença máxima de uma pergunta, categorias vazias, capacidade insuficiente e sorteio dos excedentes | `DistribuicaoTeste`, `BancoJogoTeste`, `CategoriasVisoesTeste` |
-| OAuth | Registro público, código de uso único, PKCE, vínculo de cliente e recurso, expiração, renovação, reuso, revogação, consentimento e senha inicial aceita sem alteração | `OAuthTeste`, `IntegracaoMCPTeste` |
+| OAuth | Registro público, código de uso único, PKCE, vínculo de cliente e recurso, expiração, renovação, reuso, revogação, consentimento, senha inicial aceita sem alteração e política de navegação limitada ao retorno validado | `OAuthTeste`, `IntegracaoMCPTeste` |
 | Transporte MCP | JSON-RPC, negociação, autenticação obrigatória, formatos, limites, notificações sem efeitos e mensagens de erro | `MCPTeste` |
 | Integração HTTP | Contexto e corpo preservados, CSRF dos formulários, descoberta pela entrada única e configuração canônica sem confiar em Host | `EncaminhamentoHTTPTeste`, `EntradaMCPTeste`, `IntegracaoMCPTeste` |
 | Usuários MCP | Permissões administrativas, confirmação de desativação, criação com senha inicial, ausência de troca pública e manutenção privada da senha | `FerramentasUsuariosTeste`, `OAuthTeste`, `IntegracaoMCPTeste` |
@@ -85,6 +85,10 @@ Para prévia local, preparar a configuração privada e uma pasta privada de ses
 
 ## Evidência e limites
 
-A última execução e as conferências HTTP ficam no [Memorial](../../../Memorial.md#verificações-da-implementação-do-jogo). Os relatórios são gerados e não versionados.
+O apoio `Testes/Apoio/ConferenciaNavegadorMCP.mjs` executa Chromium real em perfil próprio, com dois servidores HTTP locais e formulário fictício sem credenciais. Executar `node Testes/Apoio/ConferenciaNavegadorMCP.mjs` em ambiente com Chrome ou Edge instalado; `MCP_NAVEGADOR` permite indicar o executável. O apoio confere o bloqueio da política padrão no redirecionamento entre origens, o retorno permitido pela origem específica e a recusa de destino fora dessa permissão. Os cenários PHP conferem que o controlador produz essa política somente a partir do retorno validado.
+
+Os relatórios e o perfil isolado ficam em `Dados/Arquivos/Cache`, com identificação da execução. Os servidores e o processo de navegador são encerrados ao final. Essa conferência exercita a política do navegador; não usa conta real, não executa a sessão do ChatGPT e não substitui a implantação dos arquivos no provedor.
+
+A última execução e a conferência de retorno OAuth ficam no [Memorial](../../../Memorial.md#verificações-do-retorno-oauth-no-navegador). As verificações HTTP anteriores permanecem no histórico desse documento. Os relatórios são gerados e não versionados.
 
 Testes com dependências do navegador substituídas não comprovam desenho visual, áudio físico, instalação no dispositivo ou permissões de cópia. A conferência local não comprova a conta da hospedagem nem a execução do workflow no GitHub. A validação nesses ambientes permanece separada, conforme [Hospedagem compartilhada](../../../Implantacao/Hospedagem.md).

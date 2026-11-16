@@ -55,6 +55,8 @@ Sem persistência da sessão, a entrada recusa o atendimento com HTTP 503. O pra
 
 Respostas dinâmicas usam UTF-8, `Cache-Control: no-store`, proteção contra incorporação em quadros, `nosniff` e política de conteúdo restrita à própria origem. Estilos em linha são permitidos para valores de apresentação; scripts em linha não são permitidos.
 
+`Resposta::POLITICA_CONTEUDO` mantém a definição única da política padrão. Uma resposta de área pode fornecer seu cabeçalho específico sem alterar esse padrão. A página de [autorização MCP](../API/MCP.md#conexão) acrescenta somente a origem do retorno validado à diretiva `form-action`, mantendo as demais restrições.
+
 O controle técnico de acesso depende de `ContagemAcessos`. A implementação de banco é fornecida pelos provedores; o serviço não depende do manipulador concreto. A normalização do endereço mantém somente o prefixo público como estado técnico e não contém catálogo de ativos de uma área.
 
 ## Renderização

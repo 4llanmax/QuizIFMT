@@ -74,8 +74,14 @@ final class ConexaoMCP
 
     private function pagina(array $sessao, string $erro = '', int $status = 200): Resposta
     {
+        $politica = Resposta::POLITICA_CONTEUDO;
+        if (isset($sessao['mcpPedido'])) {
+            $retorno = \parse_url($sessao['mcpPedido']['redirect_uri']);
+            $origem = $retorno['scheme'] . '://' . $retorno['host'] . (isset($retorno['port']) ? ':' . $retorno['port'] : '');
+            $politica = \str_replace("form-action 'self'", "form-action 'self' " . $origem, $politica);
+        }
         $visao = require \dirname(__DIR__) . '/Visoes/Paginas/ConexaoMCP.php';
         return new Resposta($status, $visao(['csrf' => $sessao['mcpCSRF'], 'cliente' => $sessao['mcpPedido']['clienteNome'] ?? '',
-            'redirecionamento' => $sessao['mcpPedido']['redirect_uri'] ?? '', 'erro' => $erro, 'urlBase' => $this->urlBase, 'pedido' => isset($sessao['mcpPedido'])]));
+            'redirecionamento' => $sessao['mcpPedido']['redirect_uri'] ?? '', 'erro' => $erro, 'urlBase' => $this->urlBase, 'pedido' => isset($sessao['mcpPedido'])]), ['Content-Security-Policy' => $politica]);
     }
 }
