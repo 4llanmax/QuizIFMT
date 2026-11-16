@@ -12,9 +12,9 @@ Descrever a conexão autenticada do MCP do BombQUIZ, a gestão do acervo e a con
 
 O endereço do MCP desta instalação é `https://maxmelo.com/mcp`. O cliente DEVE usar transporte HTTP e autenticação OAuth. O cliente descobre o servidor de autorização em `/.well-known/oauth-protected-resource` e `/.well-known/oauth-authorization-server`, relativos à URL base da instalação.
 
-O cadastro do cliente usa `/oauth/registrar`. O cliente abre `/admin/mcp/autorizar` no navegador para a identificação do operador e a autorização da conexão. A emissão e a renovação de tokens usam `/oauth/token`; a revogação usa `/oauth/revogar`. A troca obrigatória da senha inicial ocorre no próprio formulário de autorização, que apresenta o nome do cliente e o endereço de retorno antes do consentimento.
+O cadastro do cliente usa `/oauth/registrar`. O cliente abre `/admin/mcp/autorizar` no navegador para a identificação do operador e a autorização da conexão. A emissão e a renovação de tokens usam `/oauth/token`; a revogação usa `/oauth/revogar`. O formulário apresenta o nome do cliente e o endereço de retorno antes do consentimento e recebe somente o e-mail e a senha definida para a conta.
 
-É OBRIGATÓRIO trocar a senha inicial antes de autorizar a primeira conexão. A nova senha DEVE conter de 10 a 72 bytes. A conta do MCP é independente da conta de jogador e do acesso à programação do jogo. É PROIBIDO incluir credenciais e tokens em perguntas, arquivos versionados, chamadas de consulta ou respostas das ferramentas.
+A senha inicial permite autorizar a primeira conexão, obter tokens e renovar o acesso enquanto a conta permanecer ativa. O login DEVE preservar a senha definida para a conta; É PROIBIDO exigir sua substituição no fluxo de autorização. A conta do MCP é independente da conta de jogador e do acesso à programação do jogo. É PROIBIDO incluir credenciais e tokens em perguntas, arquivos versionados, chamadas de consulta ou respostas das ferramentas.
 
 Para conectar, o operador DEVE cadastrar a URL do MCP no cliente que aceite servidor HTTP remoto com OAuth, abrir a página de autorização e concluir a identificação e o consentimento. Uma resposta 401 antes da autenticação apresenta a descoberta da autorização no cabeçalho `WWW-Authenticate`.
 
@@ -54,9 +54,9 @@ As consultas paginadas usam `pagina` a partir de 1 e `limite` de 1 a 100, com pa
 
 ## Usuários do MCP
 
-`usuarios_listar`, `usuarios_criar` e `usuarios_desativar` exigem conta administradora. A criação recebe o e-mail e aplica a senha inicial correspondente ao hash privado configurado. A conta nova exige troca de senha na primeira conexão. `usuarios_desativar` exige o identificador e `confirmar=true`.
+`usuarios_listar`, `usuarios_criar` e `usuarios_desativar` exigem conta administradora. A criação recebe o e-mail e aplica a senha inicial correspondente ao hash privado configurado. A conta nova utiliza essa senha diretamente, sem troca obrigatória. `usuarios_desativar` exige o identificador e `confirmar=true`.
 
-`senha_trocar` recebe a senha atual e a nova senha do próprio operador. A troca pertence à conta autenticada e não permite escolher outro proprietário.
+A conexão publica 19 ferramentas. Não há ferramenta nem campo público para o usuário alterar sua senha. A manutenção privada de uma senha pertence ao operador autorizado, DEVE armazenar somente o hash e revogar os códigos e tokens anteriores da conta. O campo `senha_inicial` permanece como informação sobre a origem da senha; É PROIBIDO usá-lo para bloquear autenticação, autorização, emissão ou renovação de tokens.
 
 ## Transporte e recusas
 

@@ -87,8 +87,8 @@ final class OAuth
     {
         $pedido = $this->validarPedido($pedido);
         $identidade = $this->dados->usuario($usuario);
-        if ($identidade === null || !(int) $identidade['ativo'] || (int) $identidade['senha_inicial']) {
-            throw new DomainException('Troque a senha inicial antes de conectar.');
+        if ($identidade === null || !(int) $identidade['ativo']) {
+            throw new DomainException('O usuário MCP não está disponível para conectar.');
         }
         $this->dados->limpar($agora);
         $codigo = \bin2hex(\random_bytes(32));
@@ -129,7 +129,7 @@ final class OAuth
                 throw new DomainException('unsupported_grant_type');
             }
             $usuario = $this->dados->usuario((int) $registro['usuario']);
-            if ($usuario === null || !(int) $usuario['ativo'] || (int) $usuario['senha_inicial']) {
+            if ($usuario === null || !(int) $usuario['ativo']) {
                 throw new DomainException('invalid_grant');
             }
             $acesso = \bin2hex(\random_bytes(32));
@@ -147,7 +147,7 @@ final class OAuth
     {
         $registro = $this->dados->token(\hash('sha256', $token));
         $usuario = $registro === null ? null : $this->dados->usuario((int) $registro['usuario']);
-        if ($registro === null || (int) $registro['revogado'] || (int) $registro['expira'] <= $agora || $registro['recurso'] !== $this->urlBase . '/mcp' || $usuario === null || !(int) $usuario['ativo'] || (int) $usuario['senha_inicial']) {
+        if ($registro === null || (int) $registro['revogado'] || (int) $registro['expira'] <= $agora || $registro['recurso'] !== $this->urlBase . '/mcp' || $usuario === null || !(int) $usuario['ativo']) {
             throw new DomainException('invalid_token');
         }
         return $this->publicar($usuario);

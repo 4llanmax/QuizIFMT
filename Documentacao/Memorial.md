@@ -14,7 +14,7 @@ O jogo BombQUIZ está implementado nas áreas Site e Painel, com inicialização
 
 Site atende identificação de convidados, contas, rodada, respostas, expiração, resultado, ranking e histórico. Painel autentica a administração e altera a programação das novas rodadas. O [detalhamento do jogo](Aplicacao/Site/Jogo.md) e a [programação](Aplicacao/Painel/Programacao.md) apresentam os contratos.
 
-A API implementa [MCP](Aplicacao/API/MCP.md) por HTTP, com autorização OAuth por página do Painel, troca obrigatória da senha inicial e gestão de usuários. As ferramentas administram perguntas e categorias e consultam jogadores, resultados, ranking e programação. Categorias com perguntas ativas participam da divisão equilibrada do total da rodada; os temas com perguntas adicionais são sorteados. Arquivamento e exclusão do acervo preservam partidas já iniciadas e resultados existentes. A habilitação depende dos parâmetros privados e das duas migrações descritas em [Atualização do MCP](Implantacao/Hospedagem.md#atualização-do-mcp).
+A API implementa [MCP](Aplicacao/API/MCP.md) por HTTP, com autorização OAuth por página do Painel e gestão de usuários. A senha definida para a conta permite conexão e renovação de tokens sem troca obrigatória; o login não oferece alteração da senha, e o catálogo não publica ferramenta de troca. As 19 ferramentas administram perguntas e categorias e consultam jogadores, resultados, ranking e programação. Categorias com perguntas ativas participam da divisão equilibrada do total da rodada; os temas com perguntas adicionais são sorteados. Arquivamento e exclusão do acervo preservam partidas já iniciadas e resultados existentes. A habilitação depende dos parâmetros privados e das duas migrações descritas em [Atualização do MCP](Implantacao/Hospedagem.md#atualização-do-mcp).
 
 Os scripts iniciais de esquema e carga estão nas pastas MariaDB de Dados. A carga contém 48 perguntas e a programação inicial, sem jogadores de exemplo. As pastas fixas de SQLite permanecem preservadas.
 
@@ -35,6 +35,18 @@ O gancho está ativo nesta cópia por `core.hooksPath=.githooks`, com autorizaç
 ### Limites da automação
 
 Os cenários da automação usam executores controlados para conferir decisões e comandos. A instalação das imagens, a preparação Linux, o TLS e a execução do job completo no GitHub ainda dependem de uma execução real do fluxo. A disponibilidade da hospedagem compartilhada não é comprovada pelas verificações locais.
+
+## Verificações da senha de acesso MCP
+
+Conferência local de 16/11/2026 após a retirada da troca obrigatória:
+
+- PHPUnit: 136 testes e 1204 asserções, sem falhas, avisos ou cenários ignorados. O conferidor integral confirma 1431/1431 linhas e 1355/1355 ramos de produção. PHPStan nível 5 e PHPCS passam.
+- Três cenários novos reproduzem, antes da mudança, o bloqueio da senha inicial, o campo de nova senha e a alteração da senha durante o login. Depois da mudança, os testes confirmam autorização, emissão, renovação e aceitação de tokens com a senha inicial e preservação do hash, inclusive quando o cliente envia o campo antigo de troca.
+- O catálogo contém 19 ferramentas e recusa a ferramenta de troca retirada sem alterar senha ou token. Usuários sem administração continuam impedidos de gerenciar identidades.
+- As migrações e a estrutura do banco permanecem inalteradas. A manutenção de senha autorizada é realizada por operação privada transacional com revogação dos códigos e tokens anteriores; seus valores e os resultados individuais ficam somente nos logs privados ignorados pelo Git.
+- A conferência HTTPS da versão hospedada confirma descoberta OAuth com HTTP 200 e desafio de autenticação no MCP com HTTP 401. Após a manutenção privada, o login com a senha definida e sem envio de nova senha produz HTTP 303 e a emissão de token retorna HTTP 200. O cliente criado exclusivamente para essa conferência é removido junto de seus códigos e tokens. A verificação usa TLS com certificados de confiança do Windows e não exibe credenciais.
+
+A atualização da interface de login e do catálogo na hospedagem depende da publicação dos arquivos deste conjunto. A manutenção privada da senha não publica código nem modifica o `.env`.
 
 ## Verificações do MCP e do pavio
 

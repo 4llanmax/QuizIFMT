@@ -35,7 +35,6 @@ final class IntegracaoMCPTeste extends TestCase
     private string $base = 'https://jogo.example.invalid';
     private const int AGORA = 1000000;
     private const string SENHA_INICIAL = 'InicialFicticia123';
-    private const string SENHA_PROPRIA = 'PropriaFicticia123';
 
     public static function setUpBeforeClass(): void
     {
@@ -92,8 +91,12 @@ final class IntegracaoMCPTeste extends TestCase
         self::assertSame(200, $pagina->status);
         self::assertStringContainsString('Cliente fictício', $pagina->corpo);
         self::assertStringNotContainsString(self::SENHA_INICIAL, $pagina->corpo);
-        $autorizacao = $this->atender('/admin/mcp/autorizar', 'POST', ['csrf' => $this->sessao['mcpCSRF'], 'acao' => 'autorizar', 'email' => 'operador@example.invalid', 'senha' => self::SENHA_INICIAL, 'senhaNova' => self::SENHA_PROPRIA], '', ['HTTP_ORIGIN' => $this->base]);
+        self::assertStringNotContainsString('senhaNova', $pagina->corpo);
+        $autorizacao = $this->atender('/admin/mcp/autorizar', 'POST', ['csrf' => $this->sessao['mcpCSRF'], 'acao' => 'autorizar', 'email' => 'operador@example.invalid', 'senha' => self::SENHA_INICIAL], '', ['HTTP_ORIGIN' => $this->base]);
         self::assertSame(303, $autorizacao->status, $autorizacao->corpo);
+        $operador = self::$banco->query("SELECT senha_hash, senha_inicial FROM usuarios_mcp WHERE email = 'operador@example.invalid'")->fetch();
+        self::assertSame(self::$hashInicial, $operador['senha_hash']);
+        self::assertSame(1, (int) $operador['senha_inicial']);
         parse_str(parse_url($autorizacao->cabecalhos['Location'], PHP_URL_QUERY), $retorno);
         self::assertSame('estado-ficticio', $retorno['state']);
         $tokens = $this->atender('/oauth/token', 'POST', ['grant_type' => 'authorization_code', 'client_id' => $cliente, 'redirect_uri' => $pedido['redirect_uri'], 'resource' => $pedido['resource'], 'code' => $retorno['code'], 'code_verifier' => $verificador]);
@@ -152,6 +155,8 @@ final class IntegracaoMCPTeste extends TestCase
         $nomes = array_column($this->json($lista)['result']['tools'], 'name');
         self::assertContains('criar_perguntas', $nomes);
         self::assertContains('usuarios_criar', $nomes);
+        self::assertCount(19, $nomes);
+        self::assertNotContains('senha_trocar', $nomes);
         $consulta = $this->chamar($conexao['access_token'], 'listar_perguntas');
         self::assertFalse($consulta['isError']);
         self::assertStringNotContainsString('senha_hash', json_encode($consulta));
@@ -161,9 +166,10 @@ final class IntegracaoMCPTeste extends TestCase
         $novo = $this->chamar($conexao['access_token'], 'usuarios_criar', ['email' => 'novo@example.invalid']);
         self::assertSame(1, (int) $novo['structuredContent']['senha_inicial']);
         self::assertFalse($this->chamar($conexao['access_token'], 'usuarios_desativar', ['identificador' => (int) $novo['structuredContent']['identificador'], 'confirmar' => true])['isError']);
-        $senha = $this->chamar($conexao['access_token'], 'senha_trocar', ['atual' => self::SENHA_PROPRIA, 'nova' => 'OutraSenhaFicticia123']);
-        self::assertTrue($senha['structuredContent']['alterada']);
-        self::assertSame(401, $this->atender('/mcp', 'POST', [], '{"jsonrpc":"2.0","id":1,"method":"ping"}', $servidor)->status);
+        $senha = $this->atender('/mcp', 'POST', [], '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"senha_trocar","arguments":{"atual":"InicialFicticia123","nova":"OutraSenhaFicticia123"}}}', $servidor);
+        self::assertSame(-32602, $this->json($senha)['error']['code']);
+        self::assertSame(self::$hashInicial, self::$banco->query("SELECT senha_hash FROM usuarios_mcp WHERE email = 'operador@example.invalid'")->fetchColumn());
+        self::assertSame(200, $this->atender('/mcp', 'POST', [], '{"jsonrpc":"2.0","id":1,"method":"ping"}', $servidor)->status);
     }
 
     #[Test]
@@ -172,7 +178,7 @@ final class IntegracaoMCPTeste extends TestCase
         $conexao = $this->conectar();
         $novo = $this->chamar($conexao['access_token'], 'usuarios_criar', ['email' => 'consulta@example.invalid']);
         $usuario = (int) $novo['structuredContent']['identificador'];
-        $this->provedor->oauth()->trocarSenha($usuario, self::SENHA_INICIAL, self::SENHA_PROPRIA);
+        self::assertSame($usuario, $this->provedor->oauth()->entrar('consulta@example.invalid', self::SENHA_INICIAL, '127.0.0.1', self::AGORA)['identificador']);
         $codigo = $this->provedor->oauth()->autorizar($conexao['pedido'], $usuario, self::AGORA);
         $token = $this->provedor->oauth()->trocar(['grant_type' => 'authorization_code', 'client_id' => $conexao['cliente'], 'redirect_uri' => $conexao['pedido']['redirect_uri'], 'resource' => $this->base . '/mcp', 'code' => $codigo, 'code_verifier' => $conexao['verificador']], self::AGORA)['access_token'];
         self::assertTrue($this->chamar($token, 'usuarios_listar')['isError']);

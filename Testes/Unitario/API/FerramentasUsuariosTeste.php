@@ -31,18 +31,15 @@ final class FerramentasUsuariosTeste extends TestCase
             },
             static function (int $identificador, int $operador) use (&$efeitos): void {
                 $efeitos[] = [$identificador, $operador];
-            },
-            static function (int $identificador, string $atual, string $nova) use (&$efeitos): void {
-                $efeitos[] = [$identificador, $atual, $nova];
             }
         );
         $admin = ['identificador' => 1, 'administrador' => true];
-        self::assertCount(4, $servico->listar());
+        self::assertSame(['usuarios_listar', 'usuarios_criar', 'usuarios_desativar'], array_column($servico->listar(), 'name'));
+        self::assertStringNotContainsString('exige troca', $servico->listar()[1]['description']);
         self::assertCount(1, $servico->executar('usuarios_listar', [], $admin)['usuarios']);
         self::assertSame(2, $servico->executar('usuarios_criar', ['email' => 'novo@example.invalid'], $admin)['identificador']);
         self::assertTrue($servico->executar('usuarios_desativar', ['identificador' => 2, 'confirmar' => true], $admin)['desativado']);
-        self::assertTrue($servico->executar('senha_trocar', ['atual' => 'anterior-ficticia', 'nova' => 'nova-ficticia'], ['identificador' => 2])['alterada']);
-        self::assertSame([['novo@example.invalid', 1], [2, 1], [2, 'anterior-ficticia', 'nova-ficticia']], $efeitos);
+        self::assertSame([['novo@example.invalid', 1], [2, 1]], $efeitos);
         foreach (
             [
             ['usuarios_listar', [], ['identificador' => 2]],
@@ -54,8 +51,8 @@ final class FerramentasUsuariosTeste extends TestCase
             ['usuarios_desativar', ['identificador' => 2, 'confirmar' => 'true'], $admin],
             ['usuarios_desativar', ['identificador' => '2', 'confirmar' => true], $admin],
             ['usuarios_desativar', ['identificador' => 0, 'confirmar' => true], $admin],
-            ['senha_trocar', ['atual' => [], 'nova' => 'nova-ficticia'], $admin],
-            ['senha_trocar', ['atual' => 'anterior', 'nova' => []], $admin],
+            ['senha_trocar', ['atual' => 'anterior-ficticia', 'nova' => 'nova-ficticia'], $admin],
+            ['senha_trocar', ['atual' => 'anterior-ficticia', 'nova' => 'nova-ficticia'], ['identificador' => 2]],
             ['desconhecida', [], $admin],
             ] as [$nome, $argumentos, $usuario]
         ) {
@@ -63,7 +60,7 @@ final class FerramentasUsuariosTeste extends TestCase
                 $servico->executar($nome, $argumentos, $usuario);
                 self::fail('A operação inválida precisa ser recusada.');
             } catch (DomainException) {
-                self::assertCount(3, $efeitos);
+                self::assertCount(2, $efeitos);
             }
         }
     }

@@ -47,7 +47,7 @@ O operador DEVE cadastrar a primeira identidade administradora por operação pr
 
 Para habilitar a conexão, acrescentar ao `.env` privado `MCP_URL_BASE`, com a origem HTTPS canônica sem barra final, e `MCP_SENHA_INICIAL_HASH`, com o hash da senha inicial dos novos usuários. Um clone do repositório não transfere o `.env`. O endereço do MCP é a URL base seguida de `/mcp`; os contratos e os passos de conexão estão em [MCP](../Aplicacao/API/MCP.md#conexão).
 
-O `.htaccess` atualizado encaminha os dois documentos de descoberta OAuth e preserva `Authorization` na entrada PHP. A hospedagem DEVE permitir essas diretivas e fornecer HTTPS ao PHP. A conferência no endereço real inclui descoberta, abertura do login, troca da senha inicial, consentimento e uma consulta sem efeitos persistentes pelo cliente MCP.
+O `.htaccess` atualizado encaminha os dois documentos de descoberta OAuth e preserva `Authorization` na entrada PHP. A hospedagem DEVE permitir essas diretivas e fornecer HTTPS ao PHP. A conferência no endereço real inclui descoberta, abertura do login, autenticação com a senha definida, consentimento e uma consulta sem efeitos persistentes pelo cliente MCP. Não há exigência de troca da senha inicial nem campo para essa alteração no login.
 
 ## Conferência no provedor
 

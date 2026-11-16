@@ -44,10 +44,10 @@ Sessões nativas usam pastas temporárias próprias, removidas após os cenário
 | Automação | Suíte própria, serviço MariaDB, etapas de cobertura e ativos, gatilho preservado | `Automacao/JogoTeste` e cenários anteriores da automação |
 | Gestão MCP | Perguntas em lote, edição parcial, arquivamento, exclusão confirmada, categorias, paginação e consultas sem credenciais | `GestaoMCPTeste`, `PerguntaTeste` |
 | Equilíbrio das categorias | Total exato, diferença máxima de uma pergunta, categorias vazias, capacidade insuficiente e sorteio dos excedentes | `DistribuicaoTeste`, `BancoJogoTeste`, `CategoriasVisoesTeste` |
-| OAuth | Registro público, código de uso único, PKCE, vínculo de cliente e recurso, expiração, renovação, reuso, revogação, consentimento e senha inicial | `OAuthTeste`, `IntegracaoMCPTeste` |
+| OAuth | Registro público, código de uso único, PKCE, vínculo de cliente e recurso, expiração, renovação, reuso, revogação, consentimento e senha inicial aceita sem alteração | `OAuthTeste`, `IntegracaoMCPTeste` |
 | Transporte MCP | JSON-RPC, negociação, autenticação obrigatória, formatos, limites, notificações sem efeitos e mensagens de erro | `MCPTeste` |
 | Integração HTTP | Contexto e corpo preservados, CSRF dos formulários, descoberta pela entrada única e configuração canônica sem confiar em Host | `EncaminhamentoHTTPTeste`, `EntradaMCPTeste`, `IntegracaoMCPTeste` |
-| Usuários MCP | Permissões administrativas, confirmação de desativação, criação com senha inicial e troca da própria senha | `FerramentasUsuariosTeste`, `OAuthTeste`, `IntegracaoMCPTeste` |
+| Usuários MCP | Permissões administrativas, confirmação de desativação, criação com senha inicial, ausência de troca pública e manutenção privada da senha | `FerramentasUsuariosTeste`, `OAuthTeste`, `IntegracaoMCPTeste` |
 
 ## Execução PHP
 

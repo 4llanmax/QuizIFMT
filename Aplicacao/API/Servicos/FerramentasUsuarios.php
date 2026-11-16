@@ -17,7 +17,7 @@ use DomainException;
 
 final class FerramentasUsuarios
 {
-    public function __construct(private Closure $consultar, private Closure $criar, private Closure $desativar, private Closure $trocar)
+    public function __construct(private Closure $consultar, private Closure $criar, private Closure $desativar)
     {
     }
 
@@ -26,9 +26,8 @@ final class FerramentasUsuarios
         $texto = ['type' => 'string'];
         $definicoes = [
             'usuarios_listar' => ['Lista os usuários do MCP. Exige administração.', [], [], true],
-            'usuarios_criar' => ['Cria usuário com a senha inicial configurada e exige troca na primeira autorização. Exige administração.', ['email' => $texto], ['email'], false],
+            'usuarios_criar' => ['Cria usuário com a senha inicial configurada. Exige administração.', ['email' => $texto], ['email'], false],
             'usuarios_desativar' => ['Desativa um usuário e revoga seu acesso. Exige administração e confirmação explícita.', ['identificador' => ['type' => 'integer', 'minimum' => 1], 'confirmar' => ['type' => 'boolean', 'const' => true]], ['identificador', 'confirmar'], false],
-            'senha_trocar' => ['Troca a senha do próprio usuário após conferir a senha atual.', ['atual' => $texto, 'nova' => $texto], ['atual', 'nova'], false],
         ];
         $ferramentas = [];
         foreach ($definicoes as $nome => [$descricao, $campos, $obrigatorios, $leitura]) {
@@ -41,7 +40,7 @@ final class FerramentasUsuarios
 
     public function executar(string $nome, array $argumentos, array $usuario): array
     {
-        if ($nome !== 'senha_trocar' && !($usuario['administrador'] ?? false)) {
+        if (!($usuario['administrador'] ?? false)) {
             throw new DomainException('Somente administradores gerenciam usuários do MCP.');
         }
         $operador = (int) $usuario['identificador'];
@@ -62,13 +61,6 @@ final class FerramentasUsuarios
             }
             ($this->desativar)($identificador, $operador);
             return ['desativado' => true];
-        }
-        if ($nome === 'senha_trocar') {
-            if (!\is_string($argumentos['atual'] ?? null) || !\is_string($argumentos['nova'] ?? null)) {
-                throw new DomainException('Informe a senha atual e a nova senha.');
-            }
-            ($this->trocar)($operador, $argumentos['atual'], $argumentos['nova']);
-            return ['alterada' => true];
         }
         throw new DomainException('Ferramenta desconhecida.');
     }

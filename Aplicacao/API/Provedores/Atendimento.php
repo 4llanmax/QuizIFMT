@@ -56,9 +56,6 @@ final class Atendimento
             static fn (string $email, int $operador): array => $oauth->criarUsuario($email, $operador),
             static function (int $identificador, int $operador) use ($oauth): void {
                 $oauth->desativarUsuario($identificador, $operador);
-            },
-            static function (int $identificador, string $atual, string $nova) use ($oauth): void {
-                $oauth->trocarSenha($identificador, $atual, $nova);
             }
         );
         $nomesUsuarios = \array_column($usuarios->listar(), 'name');

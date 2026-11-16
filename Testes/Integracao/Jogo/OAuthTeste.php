@@ -86,7 +86,7 @@ final class OAuthTeste extends TestCase
     }
 
     #[Test]
-    public function administraUsuariosSemExporHashEExigeTrocaInicial(): void
+    public function administraUsuariosSemExporHashEPermiteTrocaInterna(): void
     {
         $novo = $this->oauth->criarUsuario('novo@example.invalid', $this->usuario);
         self::assertSame(1, (int) $novo['senha_inicial']);
@@ -169,9 +169,6 @@ final class OAuthTeste extends TestCase
         }
         $this->recusar(fn () => $this->oauth->trocar($campos, 301000));
         $campos['code'] = $this->oauth->autorizar($this->pedido, $this->usuario, 1000);
-        self::$banco->exec('UPDATE usuarios_mcp SET senha_inicial = 1');
-        $this->recusar(fn () => $this->oauth->trocar($campos, 1001));
-        $this->recusar(fn () => $this->oauth->autorizar($this->pedido, $this->usuario, 1001));
         $this->recusar(fn () => $this->oauth->autorizar($this->pedido, 999999, 1001));
         self::$banco->exec('UPDATE usuarios_mcp SET ativo = 0, senha_inicial = 0');
         $this->recusar(fn () => $this->oauth->autorizar($this->pedido, $this->usuario, 1001));
@@ -194,7 +191,7 @@ final class OAuthTeste extends TestCase
         $this->recusar(fn () => $this->oauth->autenticarToken($tokens['access_token'], 1002));
         self::$banco->exec("UPDATE tokens_mcp SET recurso = 'https://quiz.example.invalid/mcp'");
         self::$banco->exec('UPDATE usuarios_mcp SET senha_inicial = 1');
-        $this->recusar(fn () => $this->oauth->autenticarToken($tokens['access_token'], 1002));
+        self::assertSame($this->usuario, $this->oauth->autenticarToken($tokens['access_token'], 1002)['identificador']);
         self::$banco->exec('UPDATE usuarios_mcp SET ativo = 0, senha_inicial = 0');
         $this->recusar(fn () => $this->oauth->autenticarToken($tokens['access_token'], 1002));
         $this->oauth->revogar($tokens['access_token'], 'outro');
@@ -246,7 +243,7 @@ final class OAuthTeste extends TestCase
     }
 
     #[Test]
-    public function paginaTrataCancelamentoOrigemExpiracaoETrocaInicial(): void
+    public function paginaTrataCancelamentoOrigemExpiracaoESenhaDefinida(): void
     {
         $controle = new \Aplicacao\Painel\Controles\ConexaoMCP($this->oauth, 'https://quiz.example.invalid');
         $sessao = [];
@@ -268,8 +265,7 @@ final class OAuthTeste extends TestCase
         self::assertSame(400, $controle->responder($servidor, '', $campos, $sessao, 601000)->status);
         self::assertSame(422, $controle->responder($servidor, '', array_replace($campos, ['acao' => 'invalida']), $sessao, 1001)->status);
         self::$banco->exec('UPDATE usuarios_mcp SET senha_inicial = 1');
-        self::assertSame(422, $controle->responder($servidor, '', $campos, $sessao, 1001)->status);
-        $resposta = $controle->responder($servidor, '', array_replace($campos, ['senhaNova' => 'NovaFicticia!234']), $sessao, 1002);
+        $resposta = $controle->responder($servidor, '', $campos, $sessao, 1001);
         self::assertSame(303, $resposta->status);
         $servidor['REQUEST_METHOD'] = 'GET';
         $controle->responder($servidor, '', [], $sessao, 2000);
@@ -362,6 +358,55 @@ final class OAuthTeste extends TestCase
         $servidor['REQUEST_METHOD'] = 'GET';
         $servidor['REQUEST_URI'] = '/.well-known/oauth-protected-resource/mcp';
         self::assertSame(200, $controle->responder($servidor, '', [], $sessao, 1001)->status);
+    }
+
+    #[Test]
+    public function senhaInicialAutorizaEmiteRenovaEAceitaBearerSemAlterarHash(): void
+    {
+        self::$banco->exec('UPDATE usuarios_mcp SET senha_inicial = 1');
+        $antes = self::$banco->query('SELECT senha_hash, senha_inicial FROM usuarios_mcp')->fetch(PDO::FETCH_ASSOC);
+        $usuario = $this->oauth->entrar('operador@example.invalid', $this->senha, '127.0.0.1', 1000);
+        self::assertSame(1, (int) $usuario['senha_inicial']);
+        $codigo = $this->oauth->autorizar($this->pedido, $usuario['identificador'], 1000);
+        $tokens = $this->oauth->trocar(['grant_type' => 'authorization_code', 'code' => $codigo, 'client_id' => $this->pedido['client_id'], 'redirect_uri' => $this->pedido['redirect_uri'], 'resource' => $this->pedido['resource'], 'code_verifier' => $this->verificador], 1001);
+        self::assertSame($this->usuario, $this->oauth->autenticarToken($tokens['access_token'], 1002)['identificador']);
+        $renovados = $this->oauth->trocar(['grant_type' => 'refresh_token', 'refresh_token' => $tokens['refresh_token'], 'client_id' => $this->pedido['client_id'], 'resource' => $this->pedido['resource']], 1003);
+        self::assertSame($this->usuario, $this->oauth->autenticarToken($renovados['access_token'], 1004)['identificador']);
+        self::assertSame($antes, self::$banco->query('SELECT senha_hash, senha_inicial FROM usuarios_mcp')->fetch(PDO::FETCH_ASSOC));
+        self::assertSame($this->usuario, $this->oauth->entrar('operador@example.invalid', $this->senha, '127.0.0.1', 1005)['identificador']);
+    }
+
+    #[Test]
+    public function formularioApresentaSomenteCredenciaisEConsentimento(): void
+    {
+        $controle = new \Aplicacao\Painel\Controles\ConexaoMCP($this->oauth, 'https://quiz.example.invalid');
+        $sessao = [];
+        $resposta = $controle->responder(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/admin/mcp/autorizar?' . http_build_query($this->pedido)], '', [], $sessao, 1000);
+        self::assertSame(200, $resposta->status);
+        self::assertStringContainsString('name="email"', $resposta->corpo);
+        self::assertStringContainsString('name="senha"', $resposta->corpo);
+        self::assertStringContainsString('Entrar e autorizar', $resposta->corpo);
+        self::assertStringNotContainsString('senhaNova', $resposta->corpo);
+        self::assertStringNotContainsString('Nova senha', $resposta->corpo);
+        self::assertStringNotContainsString('primeiro acesso', $resposta->corpo);
+    }
+
+    #[Test]
+    public function loginMantemSenhaDefinidaMesmoRecebendoCampoAntigoDeTroca(): void
+    {
+        self::$banco->exec('UPDATE usuarios_mcp SET senha_inicial = 1');
+        $antes = self::$banco->query('SELECT senha_hash, senha_inicial FROM usuarios_mcp')->fetch(PDO::FETCH_ASSOC);
+        $controle = new \Aplicacao\Painel\Controles\ConexaoMCP($this->oauth, 'https://quiz.example.invalid');
+        $sessao = [];
+        foreach ([[], ['senhaNova' => 'MudancaNaoSolicitada!234'], ['senhaNova' => ['valor inválido']]] as $extras) {
+            $servidor = ['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/admin/mcp/autorizar?' . http_build_query($this->pedido), 'REMOTE_ADDR' => '127.0.0.1'];
+            self::assertSame(200, $controle->responder($servidor, '', [], $sessao, 1000)->status);
+            $servidor['REQUEST_METHOD'] = 'POST';
+            $campos = ['csrf' => $sessao['mcpCSRF'], 'acao' => 'autorizar', 'email' => 'operador@example.invalid', 'senha' => $this->senha] + $extras;
+            self::assertSame(303, $controle->responder($servidor, '', $campos, $sessao, 1001)->status);
+            self::assertSame($antes, self::$banco->query('SELECT senha_hash, senha_inicial FROM usuarios_mcp')->fetch(PDO::FETCH_ASSOC));
+            self::assertSame($this->usuario, $this->oauth->entrar('operador@example.invalid', $this->senha, '127.0.0.1', 1002)['identificador']);
+        }
     }
 
     private function recusar(callable $operacao): void

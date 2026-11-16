@@ -50,16 +50,10 @@ final class ConexaoMCP
                 unset($sessao['mcpPedido'], $sessao['mcpPrazo']);
                 return $this->redirecionar($pedido, ['error' => 'access_denied']);
             }
-            if (($campos['acao'] ?? '') !== 'autorizar' || !\is_string($campos['email'] ?? null) || !\is_string($campos['senha'] ?? null) || \strlen($campos['email']) > 254 || \strlen($campos['senha']) > 72 || !\is_string($campos['senhaNova'] ?? '')) {
+            if (($campos['acao'] ?? '') !== 'autorizar' || !\is_string($campos['email'] ?? null) || !\is_string($campos['senha'] ?? null) || \strlen($campos['email']) > 254 || \strlen($campos['senha']) > 72) {
                 throw new DomainException('Preencha o e-mail e a senha para autorizar a conexão.');
             }
             $usuario = $this->oauth->entrar($campos['email'], $campos['senha'], $servidor['REMOTE_ADDR'] ?? '', $agora);
-            if ((int) $usuario['senha_inicial'] && ($campos['senhaNova'] ?? '') === '') {
-                throw new DomainException('Defina uma senha própria antes de conectar pela primeira vez.');
-            }
-            if (($campos['senhaNova'] ?? '') !== '') {
-                $this->oauth->trocarSenha($usuario['identificador'], $campos['senha'], $campos['senhaNova']);
-            }
             $codigo = $this->oauth->autorizar($pedido, $usuario['identificador'], $agora);
             unset($sessao['mcpPedido'], $sessao['mcpPrazo']);
             $sessao['mcpCSRF'] = \bin2hex(\random_bytes(32));

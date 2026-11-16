@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Apresenta identificação, troca de senha inicial e consentimento da conexão MCP.
+ * Apresenta identificação e consentimento da conexão MCP.
  * Redator: Allan Max
  * Data de criação: 16/11/2026
  * Status: Sem revisão
@@ -27,8 +27,6 @@ return static function (array $dados): string {
         <input type="hidden" name="csrf" value="<?= $escapar($dados['csrf']) ?>">
         <label for="email">E-mail de acesso MCP</label><input id="email" name="email" type="email" maxlength="254" autocomplete="username" required>
         <label for="senha">Senha atual</label><input id="senha" name="senha" type="password" maxlength="72" autocomplete="current-password" required>
-        <label for="senha-nova">Nova senha para o primeiro acesso</label><input id="senha-nova" name="senhaNova" type="password" minlength="10" maxlength="72" autocomplete="new-password">
-        <small>No primeiro acesso, escolha uma senha própria de 10 a 72 bytes. Nos próximos acessos, deixe este campo vazio para manter a senha.</small>
         <div><button name="acao" value="autorizar">Entrar e autorizar</button><button class="cancelar" name="acao" value="cancelar" formnovalidate>Cancelar</button></div>
         </form>
     <?php else :
