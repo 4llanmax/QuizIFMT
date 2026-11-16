@@ -25,6 +25,7 @@ QuizIFMT apresenta o jogo BombQUIZ em PHP, organizado em áreas independentes, c
 | [Ferramentas](Documentacao/04Ferramentas.md) | Verificações de desenvolvimento e integração |
 | [Externos](Documentacao/05Externos.md) | Recursos de terceiros |
 | [Jogo](Documentacao/Aplicacao/Site/Jogo.md) | Funcionamento e contratos da interface |
+| [MCP](Documentacao/Aplicacao/API/MCP.md) | Autorização por página, gestão de perguntas, categorias e usuários e consulta das partidas |
 | [Hospedagem compartilhada](Documentacao/Implantacao/Hospedagem.md) | Instalação por arquivos e SQL |
 | [Memorial](Documentacao/Memorial.md) | Estado atual, histórico e decisões registradas |
 | [Orientação para agentes](AGENTS.md) | Índice de leitura para agentes de IA |

@@ -23,7 +23,9 @@ final class Programacao
 
     public function consultar(): array
     {
-        return $this->dados->obter();
+        $configuracao = $this->dados->obter();
+        $configuracao['distribuicao'] = \Aplicacao\Nucleo\Servicos\Distribuicao::calcular($configuracao['total'], $this->dados->capacidades());
+        return $configuracao;
     }
 
     public function capacidades(): array
@@ -39,18 +41,11 @@ final class Programacao
             }
         }
         $capacidades = $this->dados->capacidades();
-        $distribuicao = $configuracao['distribuicao'] ?? [];
-        if (!\is_array($distribuicao) || \count($distribuicao) !== \count($capacidades) || $configuracao['alerta'] >= $configuracao['segundos']) {
-            throw new DomainException('Informe todos os temas e um alerta menor que o tempo da pergunta.');
+        if ($configuracao['alerta'] >= $configuracao['segundos']) {
+            throw new DomainException('Informe um alerta menor que o tempo da pergunta.');
         }
-        foreach ($capacidades as $tema => $quantidade) {
-            if (!isset($distribuicao[$tema]) || !\is_int($distribuicao[$tema]) || $distribuicao[$tema] < 0 || $distribuicao[$tema] > (int) $quantidade) {
-                throw new DomainException('A distribuição ultrapassa o acervo de perguntas disponível.');
-            }
-        }
-        if (\array_sum($distribuicao) !== $configuracao['total']) {
-            throw new DomainException('A soma dos temas precisa corresponder ao total de perguntas.');
-        }
+        $configuracao['distribuicao'] = \Aplicacao\Nucleo\Servicos\Distribuicao::calcular($configuracao['total'], $capacidades);
+        unset($configuracao['nomesTemas']);
         $this->dados->salvar($configuracao);
     }
 

@@ -12,7 +12,7 @@ Identificar contratos, isolamento, comandos e evidências dos cenários do jogo.
 
 Usar PHP 8.5.12, MariaDB 10.6.28 e as extensões de execução da aplicação, além das exigidas pelo [PHPUnit](../../../Ferramentas/PHPUnit.md). Linhas e ramos PHP exigem Xdebug em modo `coverage`. O relatório de ramos da versão instalada requer também `pathCoverage=true`; o percentual de combinações de caminhos não representa o percentual exigido de ramos de decisão.
 
-`BancoIsolado` cria um nome aleatório próprio, aplica esquema e carga e remove somente esse banco ao final da classe. Não recebe nome de banco de produção. O executor precisa de autorização para criar e remover bancos nesse serviço exclusivo de teste. Uma falha de preparação ou limpeza permanece visível.
+`BancoIsolado` cria um nome aleatório próprio, aplica esquema, carga e as migrações de categorias e OAuth e remove somente esse banco ao final da classe. Não recebe nome de banco de produção. O executor precisa de autorização para criar e remover bancos nesse serviço exclusivo de teste. Uma falha de preparação ou limpeza permanece visível.
 
 | Variável exclusiva dos testes | Tipo e padrão | Uso |
 | --- | --- | --- |
@@ -40,8 +40,14 @@ Sessões nativas usam pastas temporárias próprias, removidas após os cenário
 | Apresentação | Todas as páginas, conta e convidado, ranking vazio e preenchido, histórico vazio e preenchido, escape e HTML minificado | `VisoesTeste` |
 | Ativos | Manifesto, tipo MIME declarado, ícone, fontes locais e correspondência dos arquivos processados | `AtivosTeste` |
 | Medição | Aprovação integral, recusa de linha ou ramo ausente, relatório volumoso e LF/CRLF | `CoberturaTeste` |
-| Navegador substituído | Cronômetro, expiração, teclas, envio repetido, preferências, som, instalação, cópia e falhas das dependências | `PrincipalTeste.mjs` |
+| Navegador substituído | Cronômetro, progressão sincronizada da corda e da faísca, retomada parcial, expiração, teclas, envio repetido, preferências, som, instalação, cópia e falhas das dependências | `PrincipalTeste.mjs` |
 | Automação | Suíte própria, serviço MariaDB, etapas de cobertura e ativos, gatilho preservado | `Automacao/JogoTeste` e cenários anteriores da automação |
+| Gestão MCP | Perguntas em lote, edição parcial, arquivamento, exclusão confirmada, categorias, paginação e consultas sem credenciais | `GestaoMCPTeste`, `PerguntaTeste` |
+| Equilíbrio das categorias | Total exato, diferença máxima de uma pergunta, categorias vazias, capacidade insuficiente e sorteio dos excedentes | `DistribuicaoTeste`, `BancoJogoTeste`, `CategoriasVisoesTeste` |
+| OAuth | Registro público, código de uso único, PKCE, vínculo de cliente e recurso, expiração, renovação, reuso, revogação, consentimento e senha inicial | `OAuthTeste`, `IntegracaoMCPTeste` |
+| Transporte MCP | JSON-RPC, negociação, autenticação obrigatória, formatos, limites, notificações sem efeitos e mensagens de erro | `MCPTeste` |
+| Integração HTTP | Contexto e corpo preservados, CSRF dos formulários, descoberta pela entrada única e configuração canônica sem confiar em Host | `EncaminhamentoHTTPTeste`, `EntradaMCPTeste`, `IntegracaoMCPTeste` |
+| Usuários MCP | Permissões administrativas, confirmação de desativação, criação com senha inicial e troca da própria senha | `FerramentasUsuariosTeste`, `OAuthTeste`, `IntegracaoMCPTeste` |
 
 ## Execução PHP
 

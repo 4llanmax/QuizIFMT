@@ -10,9 +10,9 @@ Descrever o funcionamento do BombQUIZ, seus contratos HTTP, dados e controles de
 
 ## Fluxo e regras
 
-O jogador escolhe um nome de convidado ou entra em uma conta e confere a distribuição antes de começar. A programação padrão tem 20 perguntas, 45 segundos por pergunta, alerta nos últimos 10 segundos e distribuição de quatro perguntas de Geografia, quatro de História e três de cada um dos outros quatro temas.
+O jogador escolhe um nome de convidado ou entra em uma conta e confere a distribuição antes de começar. A programação padrão tem 20 perguntas, 45 segundos por pergunta e alerta nos últimos 10 segundos. O sorteio divide o total de forma equilibrada entre as categorias com perguntas ativas. Quando o total não é divisível pela quantidade de categorias, a diferença é de no máximo uma pergunta; as perguntas adicionais são distribuídas por sorteio entre categorias com capacidade disponível.
 
-O sorteio não repete perguntas na rodada e embaralha as cinco alternativas. Gabarito, perguntas futuras, identificação da partida e prazo ficam no servidor. O navegador recebe somente a pergunta atual. O gabarito dessa pergunta é apresentado depois da resposta ou do encerramento.
+O sorteio não repete perguntas na rodada e embaralha as cinco alternativas. Perguntas arquivadas não entram em novas rodadas. Categorias, perguntas e arquivamento são administrados pelo [MCP](../API/MCP.md). Mudanças no acervo não alteram as perguntas já copiadas para uma partida em andamento. Gabarito, perguntas futuras, identificação da partida e prazo ficam no servidor. O navegador recebe somente a pergunta atual. O gabarito dessa pergunta é apresentado depois da resposta ou do encerramento.
 
 Um erro ou o prazo esgotado encerra a partida. O prazo exato já está expirado. A resposta correta soma um acerto e o intervalo entre a emissão e o recebimento da resposta, incluindo a comunicação. Erros, abandono e tempo esgotado não acrescentam tempo à pontuação. Após um acerto, o jogador confirma a próxima pergunta; esse intervalo de confirmação não integra a pontuação. A última resposta correta encerra a rodada com vitória.
 

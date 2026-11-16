@@ -51,8 +51,10 @@
         function atualizar() {
             const restante = Math.max(0, limite - (performance.now() - inicio));
             const segundos = Math.ceil(restante / 1000);
+            const pavio = (Math.min(1, restante / (Number(contador.dataset.segundos) * 1000)) * 100) + '%';
             buscar('[data-digitos]').textContent = String(segundos).padStart(2, '0');
-            buscar('[data-pavio]').style.width = (restante / (Number(contador.dataset.segundos) * 1000) * 100) + '%';
+            buscar('[data-pavio]').style.width = pavio;
+            buscar('.pavio .faisca').style.left = pavio;
             document.body.classList.toggle('perigo', segundos <= Number(contador.dataset.alerta));
             document.body.classList.toggle('tremor', segundos <= 3);
             if (segundos !== ultimo && segundos <= Number(contador.dataset.alerta) && segundos > 0) tocar();

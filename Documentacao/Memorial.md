@@ -14,6 +14,8 @@ O jogo BombQUIZ está implementado nas áreas Site e Painel, com inicialização
 
 Site atende identificação de convidados, contas, rodada, respostas, expiração, resultado, ranking e histórico. Painel autentica a administração e altera a programação das novas rodadas. O [detalhamento do jogo](Aplicacao/Site/Jogo.md) e a [programação](Aplicacao/Painel/Programacao.md) apresentam os contratos.
 
+A API implementa [MCP](Aplicacao/API/MCP.md) por HTTP, com autorização OAuth por página do Painel, troca obrigatória da senha inicial e gestão de usuários. As ferramentas administram perguntas e categorias e consultam jogadores, resultados, ranking e programação. Categorias com perguntas ativas participam da divisão equilibrada do total da rodada; os temas com perguntas adicionais são sorteados. Arquivamento e exclusão do acervo preservam partidas já iniciadas e resultados existentes. A habilitação depende dos parâmetros privados e das duas migrações descritas em [Atualização do MCP](Implantacao/Hospedagem.md#atualização-do-mcp).
+
 Os scripts iniciais de esquema e carga estão nas pastas MariaDB de Dados. A carga contém 48 perguntas e a programação inicial, sem jogadores de exemplo. As pastas fixas de SQLite permanecem preservadas.
 
 `Publico/index.php`, o autocarregamento, `Configuracoes/Aplicacao/Exemplo.env` e os ativos principais têm implementação. `Publico/.htaccess` autoriza somente as versões processadas, o ícone, o manifesto e as fontes usadas. Manrope, Orbitron e a fonte sólida do Font Awesome são integradas localmente. PHPMailer e JetBrains Mono permanecem sem uso na aplicação.
@@ -33,6 +35,21 @@ O gancho está ativo nesta cópia por `core.hooksPath=.githooks`, com autorizaç
 ### Limites da automação
 
 Os cenários da automação usam executores controlados para conferir decisões e comandos. A instalação das imagens, a preparação Linux, o TLS e a execução do job completo no GitHub ainda dependem de uma execução real do fluxo. A disponibilidade da hospedagem compartilhada não é comprovada pelas verificações locais.
+
+## Verificações do MCP e do pavio
+
+Conferência local de 16/11/2026, com PHP 8.5.12, Xdebug 3.5.3, MariaDB 10.6.28 e Node.js 22.23.5:
+
+- PHPUnit: 133 testes e 1174 asserções, sem falhas, avisos ou cenários ignorados. O conferidor integral confirma 1444/1444 linhas e 1378/1378 ramos de produção, incluindo funções, closures, visões e entrada.
+- PHPStan no nível 5 e PHPCS no padrão declarado passam. Os documentos numerados permanecem idênticos ao registro, e `git diff --check` passa.
+- As ferramentas do MCP exercitam perguntas, categorias, consultas e usuários em bancos descartáveis. OAuth cobre código de uso único, PKCE, vínculo do recurso e do cliente, consentimento, troca da senha inicial, expiração, renovação e revogação por reuso.
+- Apache 2.4.65 em processo isolado recebe 19 requisições e confere descoberta, registro, login, autorização, token, Bearer, catálogo com 20 ferramentas, consulta, revogação, origem recusada e bloqueio de arquivos privados e originais. O relatório fica em `Dados/Arquivos/Cache/ApacheMCP/Resultado.json`, sem credenciais nem tokens.
+- A correção da [issue do pavio](https://github.com/4llanmax/QuizIFMT/issues/1) sincroniza a largura da corda e a posição da faísca com o tempo restante. O teste novo reproduz a posição ausente antes da correção. Original e minificado passam em 38 verificações e 64/64 intervalos V8 cada, incluindo início, meio, fim e retomada parcial da pergunta.
+- O processador confirma correspondência entre originais e arquivos minificados. Depois da correção do pavio, os cenários PHP de ativos e visões também passam: quatro testes e 126 asserções.
+
+As duas migrações MCP são aplicadas ao banco de testes autorizado com os registros existentes preservados. A identidade inicial e os parâmetros são preparados por operação privada; seus valores não integram o repositório. Os resumos dos scripts e os resultados dessa operação ficam nos logs privados ignorados pelo Git. É PROIBIDO reaplicar as migrações já concluídas nesse banco.
+
+A execução HTTP local não comprova a implantação em `https://maxmelo.com/mcp`, a autorização de um cliente externo ou a aparência e a animação em navegador real. O operador envia os arquivos pelo fluxo do provedor e acrescenta os parâmetros privados ao `.env`, conforme [Atualização do MCP](Implantacao/Hospedagem.md#atualização-do-mcp). A disponibilidade pública permanece sujeita a essa implantação e à conferência no endereço real.
 
 ## Verificações da implementação do jogo
 

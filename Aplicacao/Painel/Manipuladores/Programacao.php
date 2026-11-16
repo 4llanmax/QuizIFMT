@@ -23,7 +23,9 @@ final class Programacao implements DadosProgramacao
 
     public function obter(): array
     {
-        return \json_decode($this->banco->query('SELECT conteudo FROM configuracao WHERE identificador = 1')->fetchColumn(), true, 512, JSON_THROW_ON_ERROR);
+        $configuracao = \json_decode($this->banco->query('SELECT conteudo FROM configuracao WHERE identificador = 1')->fetchColumn(), true, 512, JSON_THROW_ON_ERROR);
+        $configuracao['nomesTemas'] = $this->banco->query('SELECT chave, nome FROM categorias ORDER BY chave')->fetchAll(PDO::FETCH_KEY_PAIR);
+        return $configuracao;
     }
 
     public function padrao(): array
@@ -33,7 +35,7 @@ final class Programacao implements DadosProgramacao
 
     public function capacidades(): array
     {
-        return $this->banco->query('SELECT tema, COUNT(*) FROM perguntas GROUP BY tema')->fetchAll(PDO::FETCH_KEY_PAIR);
+        return $this->banco->query('SELECT tema, COUNT(*) FROM perguntas WHERE arquivada = 0 GROUP BY tema ORDER BY tema')->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
     public function salvar(array $configuracao): void

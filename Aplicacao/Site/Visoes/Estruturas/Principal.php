@@ -19,7 +19,7 @@ return static function (array $dados, \Closure $escapar, \Closure $incluir): voi
     $url = static fn (string $destino = ''): string => $escapar($prefixo . $destino);
     $campoCsrf = '<input type="hidden" name="csrf" value="' . $escapar($csrf) . '">';
     $tempoFormatado = static fn (int|string $tempo): string => intdiv((int) round((int) $tempo / 1000), 60) . ':' . str_pad((string) ((int) round((int) $tempo / 1000) % 60), 2, '0', STR_PAD_LEFT);
-    $nomesTemas = ['geografia' => 'Geografia', 'historia' => 'História', 'ciencias' => 'Ciências', 'esportes' => 'Esportes', 'cinema' => 'Cinema e TV', 'musica' => 'Música'];
+    $nomesTemas = ($dados['configuracao']['nomesTemas'] ?? []) + ['geografia' => 'Geografia', 'historia' => 'História', 'ciencias' => 'Ciências', 'esportes' => 'Esportes', 'cinema' => 'Cinema e TV', 'musica' => 'Música'];
     $nomesPaginas = ['inicio' => 'Inicio', 'regras' => 'Informacoes', 'privacidade' => 'Informacoes', 'rodada' => 'Rodada', 'jogo' => 'Partida', 'resultado' => 'Resultado', 'entrar' => 'Conta', 'cadastro' => 'Conta', 'conta' => 'Perfil', 'ranking' => 'Ranking'];
     $dados += ['url' => $url, 'campoCsrf' => $campoCsrf, 'tempoFormatado' => $tempoFormatado, 'nomesTemas' => $nomesTemas];
     ?>

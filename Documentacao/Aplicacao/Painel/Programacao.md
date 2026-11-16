@@ -24,21 +24,21 @@ O operador DEVE gerar o hash em PHP local com `password_hash` e `PASSWORD_DEFAUL
 
 ## Programação
 
-Salvar recebe `total`, `segundos`, `alerta` e a coleção `distribuicao[tema]`. Cada chave de tema corresponde ao acervo.
+Salvar recebe `total`, `segundos` e `alerta`. A distribuição é calculada automaticamente entre as categorias com perguntas ativas e não recebe quantidades definidas manualmente.
 
 | Campo | Valores aceitos |
 | --- | --- |
 | Total | Inteiro de 5 a 48 |
 | Segundos | Inteiro de 10 a 120 |
 | Alerta | Inteiro de 3 a 30, menor que os segundos da pergunta |
-| Distribuição | Todos os temas, quantidade inteira não negativa, sem superar as perguntas disponíveis |
-| Soma dos temas | Exatamente igual ao total |
+| Distribuição calculada | Diferença máxima de uma pergunta entre categorias participantes, sem superar o acervo ativo |
+| Soma calculada | Exatamente igual ao total; categorias sem perguntas ativas não participam |
 
-Capacidades são lidas do banco pelo próprio Painel, sem depender de implementação do Site. A atualização substitui atomicamente o documento de configuração. Alterações afetam somente partidas iniciadas depois de salvar; partidas existentes mantêm sua configuração e perguntas.
+Capacidades e nomes das categorias são lidos do banco pelo próprio Painel, sem depender de implementação do Site. O sorteio das novas rodadas escolhe quais categorias com capacidade recebem uma pergunta extra quando houver resto. A atualização substitui atomicamente o documento de configuração. Alterações afetam somente partidas iniciadas depois de salvar; partidas existentes mantêm sua configuração e perguntas.
 
 Restaurar aplica o documento padrão da carga inicial. Não apaga contas, partidas ou ranking. Jogadores fictícios e o apagamento geral do demonstrativo não integram a administração do banco compartilhado.
 
-Sucesso produz HTTP 303 de volta ao Painel. Valores inválidos retornam 422 sem gravação; falhas técnicas retornam 503. Não há interface de alteração das perguntas; mudanças do acervo seguem scripts de manutenção do banco.
+Sucesso produz HTTP 303 de volta ao Painel. Valores inválidos retornam 422 sem gravação; falhas técnicas retornam 503. A alteração de perguntas e categorias usa o [MCP autenticado](../API/MCP.md); esse acesso possui identidades próprias e autorização por página.
 
 ## Verificação
 

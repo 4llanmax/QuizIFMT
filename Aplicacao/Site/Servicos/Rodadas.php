@@ -27,11 +27,10 @@ final class Rodadas
         $configuracao = $this->dados->configuracao();
         $banco = $this->dados->perguntas();
         $sorteadas = [];
-        foreach ($configuracao['distribuicao'] as $tema => $quantidade) {
+        $capacidades = \array_count_values(\array_column($banco, 'tema'));
+        $distribuicao = \Aplicacao\Nucleo\Servicos\Distribuicao::calcular($configuracao['total'], $capacidades, true);
+        foreach ($distribuicao as $tema => $quantidade) {
             $grupo = \array_values(\array_filter($banco, fn (array $pergunta): bool => $pergunta['tema'] === $tema));
-            if (\count($grupo) < $quantidade) {
-                throw new DomainException('O acervo não atende à programação da rodada.');
-            }
             \shuffle($grupo);
             foreach (\array_slice($grupo, 0, $quantidade) as $pergunta) {
                 $ordem = \range(0, 4);

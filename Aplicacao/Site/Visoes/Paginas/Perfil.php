@@ -35,7 +35,7 @@ return static function (array $dados, \Closure $escapar, \Closure $incluir): voi
 <div class="cartao"><div class="secao-cabecalho"><h2>Desempenho por tema</h2></div><?php if ($temas === []) :
     ?><p class="vazio">Sem respostas ainda.</p><?php
                                                                                    endif; ?><?php foreach ($temas as $tema => [$corretas, $respondidas]) :
-    ?><?php $percentual = (int) round($corretas / $respondidas * 100); ?><div class="tema-barra"><div class="topo"><span><?= $nomesTemas[$tema] ?> · <?= $respondidas ?> perguntas</span><span><?= $percentual ?>%</span></div><div class="trilho"><i style="width:<?= $percentual ?>%;background:var(--sucesso)"></i></div></div><?php
+    ?><?php $percentual = (int) round($corretas / $respondidas * 100); ?><div class="tema-barra"><div class="topo"><span><?= $escapar($nomesTemas[$tema] ?? $tema) ?> · <?= $respondidas ?> perguntas</span><span><?= $percentual ?>%</span></div><div class="trilho"><i style="width:<?= $percentual ?>%;background:var(--sucesso)"></i></div></div><?php
                                                                                    endforeach; ?></div>
 <div class="cartao"><div class="secao-cabecalho"><h2>Histórico</h2></div><?php if ($historico === []) :
     ?><p class="vazio">Nenhuma partida ainda.</p><?php

@@ -26,7 +26,7 @@ return static function (array $dados, \Closure $escapar, \Closure $incluir): voi
     <?php else :
         ?><div class="salvo-aviso" role="status">✓ Resposta correta! O pavio está apagado.</div><?php
     endif; ?>
-<div class="pergunta-cartao"><div class="pergunta-topo"><span class="pergunta-tema"><?= $nomesTemas[$partida['pergunta']['tema']] ?></span><span class="pergunta-etiqueta">Eliminatória</span></div><h1 class="pergunta-texto"><?= $escapar($partida['pergunta']['enunciado']) ?></h1></div>
+<div class="pergunta-cartao"><div class="pergunta-topo"><span class="pergunta-tema"><?= $escapar($nomesTemas[$partida['pergunta']['tema']] ?? $partida['pergunta']['tema']) ?></span><span class="pergunta-etiqueta">Eliminatória</span></div><h1 class="pergunta-texto"><?= $escapar($partida['pergunta']['enunciado']) ?></h1></div>
     <?php if ($partida['situacao'] === 'jogando') :
         ?><form class="alternativas" method="post" action="<?= $url('responder') ?>"><?= $campoCsrf ?><input type="hidden" name="partida" value="<?= $escapar($partida['identificador']) ?>"><input type="hidden" name="indice" value="<?= $partida['indice'] ?>"><?php foreach ($partida['pergunta']['alternativas'] as $indice => $alternativa) :
     ?><button class="alternativa" type="submit" name="alternativa" value="<?= $indice ?>" data-alternativa="<?= $indice ?>"><span class="letra"><?= 'ABCDE'[$indice] ?></span><span class="texto"><?= $escapar($alternativa) ?></span></button><?php

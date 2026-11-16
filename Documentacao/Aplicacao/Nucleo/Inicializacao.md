@@ -12,9 +12,9 @@ Descrever configuração, conexão, sessão, seleção de área e renderização
 
 A entrada dinâmica é `Publico/index.php`. Ela registra o autocarregamento PSR-4 e fornece as descrições do Site e do Painel. `EntradaHTTP` prepara a sessão nativa e emite a resposta. `Inicializacao` lê parâmetros, abre a conexão e aciona `Web`.
 
-`Web` seleciona a primeira descrição cujo prefixo corresponde a um segmento completo do caminho. A descrição de raiz é o destino padrão e DEVE ficar por último. As associações de método e caminho pertencem aos arquivos `Rotas/Mapa.php` das áreas.
+`Web` seleciona a primeira descrição cujo prefixo corresponde a um segmento completo do caminho. A descrição de raiz é o destino padrão e DEVE ficar por último. As associações de método e caminho pertencem aos arquivos de `Rotas` das áreas. `RoteadorHTTP` encaminha corpo e contexto HTTP para integrações com autenticação própria, enquanto `Roteador` atende os formulários protegidos pelo CSRF comum. As integrações são responsáveis por validar método, origem, autenticação e formato antes de executar suas operações.
 
-O autocarregamento associa exclusivamente `Aplicacao\` à árvore `Aplicacao`. As declarações de testes recebem registro independente em `Testes/Apoio/Preparacao.php`.
+O autocarregamento associa exclusivamente `Aplicacao\` à árvore `Aplicacao`. As declarações de testes recebem registro independente em `Testes/Apoio/Preparacao.php`. A entrada lê no máximo 1 MiB mais um byte do corpo bruto, permitindo que o transporte recuse excesso antes de interpretar JSON. Os parâmetros específicos do MCP estão em [MCP](../API/MCP.md#parâmetros-privados).
 
 ## Gramática dos parâmetros
 

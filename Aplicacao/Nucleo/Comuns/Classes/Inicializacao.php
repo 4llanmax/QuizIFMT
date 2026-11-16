@@ -24,7 +24,7 @@ final class Inicializacao
     }
 
     /** A composição das áreas é fornecida pela entrada; o Núcleo não conhece suas implementações. */
-    public function responder(array $servidor, array $campos, array $processo, array &$sessao, Closure $construir, int $agora): Resposta
+    public function responder(array $servidor, array $campos, array $processo, array &$sessao, Closure $construir, int $agora, string $corpo = ''): Resposta
     {
         try {
             if (($servidor['HTTPS'] ?? '') !== 'on' && !\in_array($servidor['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) {
@@ -33,7 +33,7 @@ final class Inicializacao
             $parametros = new Parametros($this->raiz . '/Configuracoes/Aplicacao/.env', $processo, $this->adicionais);
             $caminho = (new Entrega($parametros->obter('urlPrefixo')))->caminho($servidor['REQUEST_URI'] ?? '/');
             $web = $construir((new Banco($parametros))->conectar(), $parametros);
-            return $web->atender($servidor['REQUEST_METHOD'] ?? 'GET', $caminho, $campos, $sessao, $agora, $servidor['REMOTE_ADDR'] ?? '');
+            return $web->atender($servidor['REQUEST_METHOD'] ?? 'GET', $caminho, $campos, $sessao, $agora, $servidor['REMOTE_ADDR'] ?? '', $servidor, $corpo);
         } catch (FalhaHTTP $falha) {
             return new Resposta($falha->status, \htmlspecialchars($falha->getMessage(), ENT_QUOTES, 'UTF-8'));
         } catch (Throwable $falha) {

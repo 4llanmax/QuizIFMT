@@ -144,8 +144,8 @@ final class BancoJogoTeste extends TestCase
         $programacao->salvar($nova);
         self::assertSame(30, $this->acervo->configuracao()['segundos']);
         foreach (
-            [array_replace($padrao, ['total' => 21]), array_replace($padrao, ['segundos' => 1]),
-            array_replace($padrao, ['alerta' => 45]), array_replace($padrao, ['distribuicao' => ['geografia' => 20]])] as $invalida
+            [array_replace($padrao, ['total' => 49]), array_replace($padrao, ['segundos' => 1]),
+            array_replace($padrao, ['alerta' => 45]), array_replace($padrao, ['segundos' => 30, 'alerta' => 30])] as $invalida
         ) {
             try {
                 $programacao->salvar($invalida);
@@ -348,7 +348,7 @@ final class BancoJogoTeste extends TestCase
         self::assertSame(303, $web->atender('POST', '/admin/salvar', $campos, $sessao, 1000, 'admin')->status);
         self::assertSame(30, $this->acervo->configuracao()['segundos']);
         $campos['distribuicao'] = 'invalida';
-        self::assertSame(422, $web->atender('POST', '/admin/salvar', $campos, $sessao, 1000, 'admin')->status);
+        self::assertSame(303, $web->atender('POST', '/admin/salvar', $campos, $sessao, 1000, 'admin')->status);
         $campos['total'] = [];
         self::assertSame(422, $web->atender('POST', '/admin/salvar', $campos, $sessao, 1000, 'admin')->status);
         $web->atender('POST', '/admin/restaurar', ['csrf' => $sessao['csrf']], $sessao, 1000, 'admin');
@@ -414,13 +414,16 @@ final class BancoJogoTeste extends TestCase
     }
 
     #[Test]
-    public function recusaDistribuicaoExcedenteSemAlterarProgramacao(): void
+    public function ignoraDistribuicaoManualECalculaDivisaoEquilibrada(): void
     {
         $servico = new Programacao(new \Aplicacao\Painel\Manipuladores\Programacao(self::$banco));
         $invalida = $this->acervo->configuracao();
         $invalida['distribuicao']['geografia'] = 9;
-        $this->expectException(DomainException::class);
         $servico->salvar($invalida);
+        $calculada = $servico->consultar()['distribuicao'];
+        self::assertSame($invalida['total'], array_sum($calculada));
+        self::assertSame(1, max($calculada) - min($calculada));
+        self::assertLessThan(9, $calculada['geografia']);
     }
 
     #[Test]

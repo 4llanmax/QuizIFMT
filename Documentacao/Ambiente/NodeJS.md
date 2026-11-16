@@ -10,7 +10,7 @@ Identificar a execução dos testes JavaScript e a medição V8 no desenvolvimen
 
 ## Pastas e arquivos no projeto
 
-O Node.js é programa do ambiente, não é incluído no repositório e não é requisito da hospedagem PHP. O workflow seleciona Node 22. A execução local desta alteração usa o executor JavaScript da sessão; o comando Node não é identificado no PATH inicial da cópia.
+O Node.js é programa do ambiente, não é incluído no repositório e não é requisito da hospedagem PHP. O workflow seleciona Node 22. O comando Node não é identificado no PATH inicial da cópia. A conferência local do MCP e do pavio usa Node.js 22.23.5 em distribuição oficial Windows x64, extraída em `Dados/Arquivos/Cache/Node22` e ignorada pelo Git, com SHA-256 conferido pelo manifesto da distribuição. Os arquivos dessa distribuição não integram a entrega da aplicação.
 
 | Caminho | Situação | Finalidade |
 | --- | --- | --- |

@@ -18,6 +18,8 @@ O MariaDB é serviço do ambiente e não é incluído na aplicação. A versão 
 | `Dados/Esquemas/MariaDB/I.2026.11.15.0001.sql` | Arquivo existente | Instalação inicial do esquema |
 | `Dados/Cargas/MariaDB` | Diretório existente | Carga e manutenção de dados para MariaDB |
 | `Dados/Cargas/MariaDB/I.2026.11.15.0001.sql` | Arquivo existente | Carga inicial do acervo e da configuração |
+| `Dados/Esquemas/MariaDB/M.2026.11.16.0001.sql` | Arquivo existente | Categorias e arquivamento de perguntas |
+| `Dados/Esquemas/MariaDB/M.2026.11.16.0002.sql` | Arquivo existente | Identidades, clientes, códigos e tokens MCP |
 | `Configuracoes/Aplicacao/Exemplo.env` | Arquivo existente | Modelo dos parâmetros reconhecidos |
 | `Configuracoes/Aplicacao/.env` | Destino privado e não versionado | Valores da instalação |
 

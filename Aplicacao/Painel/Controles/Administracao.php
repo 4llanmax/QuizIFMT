@@ -47,13 +47,8 @@ final class Administracao
             return $this->redirecionar();
         }
         if ($operacao === 'salvar') {
-            $distribuicao = $campos['distribuicao'] ?? [];
-            if (!\is_array($distribuicao)) {
-                $distribuicao = [];
-            }
             $configuracao = ['total' => $this->inteiro($campos['total'] ?? null),
-                'segundos' => $this->inteiro($campos['segundos'] ?? null), 'alerta' => $this->inteiro($campos['alerta'] ?? null),
-                'distribuicao' => \array_map(fn (mixed $valor): int|false => $this->inteiro($valor), $distribuicao)];
+                'segundos' => $this->inteiro($campos['segundos'] ?? null), 'alerta' => $this->inteiro($campos['alerta'] ?? null)];
             $this->programacao->salvar($configuracao);
             return $this->redirecionar();
         }

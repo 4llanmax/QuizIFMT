@@ -49,6 +49,8 @@ final class BancoIsolado
             $raiz = dirname(__DIR__, 2);
             $banco->exec(file_get_contents($raiz . '/Dados/Esquemas/MariaDB/I.2026.11.15.0001.sql'));
             $banco->exec(file_get_contents($raiz . '/Dados/Cargas/MariaDB/I.2026.11.15.0001.sql'));
+            $banco->exec(file_get_contents($raiz . '/Dados/Esquemas/MariaDB/M.2026.11.16.0001.sql'));
+            $banco->exec(file_get_contents($raiz . '/Dados/Esquemas/MariaDB/M.2026.11.16.0002.sql'));
             return $banco;
         } catch (Throwable $falha) {
             $this->limpar();

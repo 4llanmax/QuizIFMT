@@ -31,7 +31,8 @@ final class EntradaHTTP
             (new Resposta(503, 'Não foi possível iniciar uma sessão segura. Tente novamente mais tarde.'))->enviar();
             return;
         }
-        $resposta = (new Inicializacao($this->raiz, $this->adicionais))->responder($_SERVER, $_POST, \getenv(), $_SESSION, $this->construir, (int) \floor(\microtime(true) * 1000));
+        $corpo = (string) \file_get_contents('php://input', false, null, 0, 1048577);
+        $resposta = (new Inicializacao($this->raiz, $this->adicionais))->responder($_SERVER, $_POST, \getenv(), $_SESSION, $this->construir, (int) \floor(\microtime(true) * 1000), $corpo);
         if (isset($_SESSION['renovar'])) {
             \session_regenerate_id(true);
             unset($_SESSION['renovar']);

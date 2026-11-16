@@ -39,12 +39,16 @@ final class Acervo implements DadosJogo
 
     public function configuracao(): array
     {
-        return \json_decode($this->banco->query('SELECT conteudo FROM configuracao WHERE identificador = 1')->fetchColumn(), true, 512, JSON_THROW_ON_ERROR);
+        $configuracao = \json_decode($this->banco->query('SELECT conteudo FROM configuracao WHERE identificador = 1')->fetchColumn(), true, 512, JSON_THROW_ON_ERROR);
+        $configuracao['nomesTemas'] = $this->banco->query('SELECT chave, nome FROM categorias ORDER BY chave')->fetchAll(PDO::FETCH_KEY_PAIR);
+        $capacidades = $this->banco->query('SELECT tema, COUNT(*) FROM perguntas WHERE arquivada = 0 GROUP BY tema ORDER BY tema')->fetchAll(PDO::FETCH_KEY_PAIR);
+        $configuracao['distribuicao'] = \Aplicacao\Nucleo\Servicos\Distribuicao::calcular($configuracao['total'], $capacidades);
+        return $configuracao;
     }
 
     public function perguntas(): array
     {
-        $perguntas = $this->banco->query('SELECT tema, enunciado, alternativas, correta FROM perguntas ORDER BY identificador')->fetchAll(PDO::FETCH_ASSOC);
+        $perguntas = $this->banco->query('SELECT tema, enunciado, alternativas, correta FROM perguntas WHERE arquivada = 0 ORDER BY identificador')->fetchAll(PDO::FETCH_ASSOC);
         foreach ($perguntas as &$pergunta) {
             $pergunta['alternativas'] = \json_decode($pergunta['alternativas'], true, 512, JSON_THROW_ON_ERROR);
             $pergunta['correta'] = (int) $pergunta['correta'];

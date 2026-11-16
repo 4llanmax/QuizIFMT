@@ -19,13 +19,14 @@ export async function executar(raiz, arquivo = 'Principal.js', contextos = []) {
         const eventos = {};
         const eventosJanela = {};
         const estado = { agora: 0, envios: 0, cliques: 0, sons: 0, atributos: {}, classes: new Set(), quadro: null };
-        const contador = { dataset: { restante: '45000', alerta: '10', segundos: '45' } };
+        const contador = { dataset: { restante: opcoes.restante ?? '45000', alerta: '10', segundos: '45' } };
         const mensagem = { textContent: '', classList: opcoes.classeAusente ? undefined : { add: nome => estado.classes.add(nome) } };
         const botaoSom = { setAttribute: (nome, valor) => estado.atributos[nome] = valor };
         const elementos = {
             '[data-restante]': opcoes.jogo === false ? null : contador,
             '[data-digitos]': { textContent: '' },
             '[data-pavio]': { style: {} },
+            '.pavio .faisca': { style: {} },
             '[data-expiracao]': { requestSubmit: () => estado.envios++ },
             '[data-mensagem]': opcoes.mensagemAusente ? null : mensagem,
             '[data-som]': opcoes.botaoSom ? botaoSom : null,
@@ -68,6 +69,14 @@ export async function executar(raiz, arquivo = 'Principal.js', contextos = []) {
     pessoa.eventosJanela.pageshow({ persisted: true });
     conferir(pessoa.estado.recarregamentos, 1);
     conferir(pessoa.elementos['[data-digitos]'].textContent, '45');
+    conferir(pessoa.elementos['[data-pavio]'].style.width, '100%');
+    conferir(pessoa.elementos['.pavio .faisca'].style.left, '100%');
+    pessoa.estado.agora = 22500; pessoa.estado.quadro();
+    conferir(pessoa.elementos['[data-pavio]'].style.width, '50%');
+    conferir(pessoa.elementos['.pavio .faisca'].style.left, '50%');
+    pessoa.estado.agora = 22625; pessoa.estado.quadro();
+    conferir(pessoa.elementos['.pavio .faisca'].style.left, pessoa.elementos['[data-pavio]'].style.width);
+    conferir(parseFloat(pessoa.elementos['.pavio .faisca'].style.left) < 50, true);
     pessoa.estado.agora = 36000; pessoa.estado.quadro();
     conferir(pessoa.elementos['[data-digitos]'].textContent, '09');
     conferir(pessoa.estado.classes.has('perigo'), true);
@@ -75,6 +84,14 @@ export async function executar(raiz, arquivo = 'Principal.js', contextos = []) {
     conferir(pessoa.estado.classes.has('tremor'), true);
     pessoa.estado.agora = 45000; pessoa.estado.quadro();
     conferir(pessoa.estado.envios, 1);
+    conferir(pessoa.elementos['[data-pavio]'].style.width, '0%');
+    conferir(pessoa.elementos['.pavio .faisca'].style.left, '0%');
+    const retomada = preparar({ restante: '22500' });
+    conferir(retomada.elementos['[data-pavio]'].style.width, '50%');
+    conferir(retomada.elementos['.pavio .faisca'].style.left, '50%');
+    retomada.estado.agora = 23000; retomada.estado.quadro();
+    conferir(retomada.elementos['.pavio .faisca'].style.left, '0%');
+    conferir(retomada.estado.envios, 1);
     tecla(pessoa, 'A'); tecla(pessoa, '2');
     conferir(pessoa.estado.cliques, 2);
     for (const extras of [{ctrlKey:true}, {metaKey:true}, {altKey:true}, {repeat:true}, {target:{tagName:'INPUT'}}, {target:{tagName:'TEXTAREA'}}]) tecla(pessoa, 'A', extras);

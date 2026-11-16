@@ -22,16 +22,22 @@ final class Web
     {
     }
 
-    public function atender(string $metodo, string $caminho, array $campos, array &$sessao, int $agora, string $origem): Resposta
+    public function atender(string $metodo, string $caminho, array $campos, array &$sessao, int $agora, string $origem, array $servidor = [], string $corpo = ''): Resposta
     {
         $sessao['csrf'] ??= \bin2hex(\random_bytes(32));
         $sessao['tokenConvidado'] ??= \bin2hex(\random_bytes(32));
         try {
-            if ($metodo === 'POST' && (!\is_string($campos['csrf'] ?? null) || !\hash_equals($sessao['csrf'], $campos['csrf']))) {
-                throw new FalhaHTTP(403, 'A sessão do formulário expirou. Abra a página novamente.');
-            }
             foreach ($this->areas as $prefixo => $area) {
                 if ($prefixo === '/' || $caminho === $prefixo || \str_starts_with($caminho, $prefixo . '/')) {
+                    if ($area instanceof RoteadorHTTP) {
+                        $servidor['REQUEST_METHOD'] = $metodo;
+                        $servidor['REQUEST_URI'] ??= $caminho;
+                        $servidor['REMOTE_ADDR'] = $origem;
+                        return $area->atender($caminho, $servidor, $corpo, $campos, $sessao, $agora);
+                    }
+                    if ($metodo === 'POST' && (!\is_string($campos['csrf'] ?? null) || !\hash_equals($sessao['csrf'], $campos['csrf']))) {
+                        throw new FalhaHTTP(403, 'A sessão do formulário expirou. Abra a página novamente.');
+                    }
                     return $area->atender($metodo, $caminho, $campos, $sessao, $agora, $origem);
                 }
             }
